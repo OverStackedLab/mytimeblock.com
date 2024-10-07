@@ -1,35 +1,62 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { useMemo } from "react";
+import { dayjsLocalizer, Calendar, Views } from "react-big-calendar";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+// When using `Day.js`
+import dayjs from "dayjs";
+// and, for optional time zone support
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(timezone);
+
+// end optional time zone support
+
+// Note that the dayjsLocalizer extends Day.js with the following plugins:
+// - IsBetween
+// - IsSameOrAfter
+// - IsSameOrBefore
+// - LocaleData
+// - LocalizedFormat
+// - MinMax
+// - UTC
+
+const DragAndDropCalendar = withDragAndDrop(Calendar);
+
+const events = [
+  {
+    id: 1,
+    title: "Long Event",
+    start: new Date(new Date().setHours(new Date().getHours() - 3)),
+    end: new Date(new Date().setHours(new Date().getHours() + 3)),
+  },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+  const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
+  // const defaultDate = useMemo(() => new Date(2015, 3, 12), []);
+
+  const { defaultDate, views } = useMemo(
+    () => ({
+      defaultDate: new Date(2015, 3, 1),
+      views: [Views.WEEK, Views.DAY],
+    }),
+    []
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <DragAndDropCalendar
+      defaultDate={defaultDate}
+      defaultView={Views.WEEK}
+      events={events}
+      localizer={localizer}
+      // onEventDrop={moveEvent}
+      // onEventResize={resizeEvent}
+      popup
+      resizable
+      views={views}
+    />
+  );
 }
 
-export default App
+export default App;
