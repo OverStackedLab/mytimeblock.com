@@ -57,6 +57,23 @@ $ yarn
 $ yarn run dev
 ```
 
+or
+
+```
+$ yarn
+
+$npx vite
+
+{
+  "scripts": {
+    "dev": "vite", // start dev server, aliases: `vite dev`, `vite serve`
+    "build": "vite build", // build for production
+    "preview": "vite preview" // locally preview production build
+  }
+}
+
+```
+
 ```
   VITE v5.4.8  ready in 484 ms
 
