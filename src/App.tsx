@@ -34,19 +34,17 @@ const events = [
 
 function App() {
   const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
-  // const defaultDate = useMemo(() => new Date(2015, 3, 12), []);
 
-  const { defaultDate, views } = useMemo(
+  const { views } = useMemo(
     () => ({
-      defaultDate: new Date(2015, 3, 1),
-      views: [Views.WEEK, Views.DAY],
+      views: [Views.MONTH, Views.WEEK, Views.DAY],
     }),
     []
   );
 
   return (
     <DragAndDropCalendar
-      defaultDate={defaultDate}
+      // defaultDate={defaultDate}
       defaultView={Views.WEEK}
       events={events}
       localizer={localizer}
