@@ -73,17 +73,34 @@ function App() {
     [setMyEvents]
   );
 
+  const handleSelectSlot = useCallback(
+    ({ start, end }) => {
+      const title = window.prompt("New Event name");
+      if (title) {
+        setMyEvents((prev) => [...prev, { start, end, title }]);
+      }
+    },
+    [setMyEvents]
+  );
+
+  const handleSelectEvent = useCallback(
+    (event) => window.alert(event.title),
+    []
+  );
+
   return (
     <DragAndDropCalendar
-      // defaultDate={defaultDate}
       defaultView={Views.WEEK}
       events={myEvents}
       localizer={localizer}
-      onEventDrop={moveEvent}
-      onEventResize={resizeEvent}
       popup
       resizable
+      selectable
       views={views}
+      onEventDrop={moveEvent}
+      onEventResize={resizeEvent}
+      onSelectEvent={handleSelectEvent}
+      onSelectSlot={handleSelectSlot}
     />
   );
 }
