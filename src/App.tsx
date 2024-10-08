@@ -1,6 +1,6 @@
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { dayjsLocalizer, Calendar, Views } from "react-big-calendar";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 // When using `Day.js`
@@ -33,8 +33,9 @@ const events = [
 ];
 
 function App() {
-  const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
+  const [myEvents, setMyEvents] = useState(events);
 
+  const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
   const { views } = useMemo(
     () => ({
       views: [Views.MONTH, Views.WEEK, Views.DAY],
@@ -42,14 +43,44 @@ function App() {
     []
   );
 
+  const moveEvent = useCallback(
+    ({ event, start, end, isAllDay: droppedOnAllDaySlot = false }) => {
+      const { allDay } = event;
+      if (!allDay && droppedOnAllDaySlot) {
+        event.allDay = true;
+      }
+      if (allDay && !droppedOnAllDaySlot) {
+        event.allDay = false;
+      }
+
+      setMyEvents((prev) => {
+        const existing = prev.find((ev) => ev.id === event.id) ?? {};
+        const filtered = prev.filter((ev) => ev.id !== event.id);
+        return [...filtered, { ...existing, start, end, allDay: event.allDay }];
+      });
+    },
+    [setMyEvents]
+  );
+
+  const resizeEvent = useCallback(
+    ({ event, start, end }) => {
+      setMyEvents((prev) => {
+        const existing = prev.find((ev) => ev.id === event.id) ?? {};
+        const filtered = prev.filter((ev) => ev.id !== event.id);
+        return [...filtered, { ...existing, start, end }];
+      });
+    },
+    [setMyEvents]
+  );
+
   return (
     <DragAndDropCalendar
       // defaultDate={defaultDate}
       defaultView={Views.WEEK}
-      events={events}
+      events={myEvents}
       localizer={localizer}
-      // onEventDrop={moveEvent}
-      // onEventResize={resizeEvent}
+      onEventDrop={moveEvent}
+      onEventResize={resizeEvent}
       popup
       resizable
       views={views}
