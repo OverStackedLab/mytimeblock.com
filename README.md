@@ -81,3 +81,11 @@ $npx vite
   ➜  Network: use --host to expose
   ➜  press h + enter to show help
 ```
+
+## Deploying to google firebase
+
+```
+$ yarn run build
+
+$ firebase deploy
+```
