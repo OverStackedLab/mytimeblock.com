@@ -8,7 +8,10 @@ export default defineConfig({
     react(),
     checker({
       typescript: true,
-      overlay: true,
+      eslint: {
+        useFlatConfig: true,
+        lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+      },
     }),
   ],
 });
