@@ -89,3 +89,7 @@ $ yarn run build
 
 $ firebase deploy
 ```
+
+## Resources
+
+[TypeScript Example](https://github.com/Mumma6/react-calendar-example)
