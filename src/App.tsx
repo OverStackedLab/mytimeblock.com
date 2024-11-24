@@ -14,6 +14,8 @@ import withDragAndDrop, {
 import dayjs from "dayjs";
 // and, for optional time zone support
 import timezone from "dayjs/plugin/timezone";
+import EventEditor from "./EventEditor";
+import Box from "@mui/material/Box";
 
 dayjs.extend(timezone);
 
@@ -109,19 +111,24 @@ function App() {
   }, []);
 
   return (
-    <DragAndDropCalendar
-      defaultView={Views.WEEK}
-      events={myEvents}
-      localizer={localizer}
-      popup
-      resizable
-      selectable
-      views={views}
-      onSelectEvent={handleSelectEvent}
-      onEventDrop={moveEvent}
-      onEventResize={resizeEvent}
-      onSelectSlot={handleSelectSlot}
-    />
+    <Box display="flex" gap={2} p={6}>
+      <Box flex={1}>
+        <DragAndDropCalendar
+          defaultView={Views.WEEK}
+          events={myEvents}
+          localizer={localizer}
+          popup
+          resizable={true}
+          selectable
+          views={views}
+          onSelectEvent={handleSelectEvent}
+          onEventDrop={moveEvent}
+          onEventResize={resizeEvent}
+          onSelectSlot={handleSelectSlot}
+        />
+      </Box>
+      <EventEditor />
+    </Box>
   );
 }
 
