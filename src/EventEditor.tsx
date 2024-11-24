@@ -1,57 +1,65 @@
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Stack } from "@mui/material";
+import {
+  FormContainer,
+  TextFieldElement,
+  TextareaAutosizeElement,
+} from "react-hook-form-mui";
+import { useForm } from "react-hook-form";
 
 const EventEditor = () => {
+  const formContext = useForm<{ eventTitle: string; eventDescription: string }>(
+    {
+      defaultValues: {
+        eventTitle: "",
+        eventDescription: "",
+      },
+    }
+  );
+
+  type FormValues = {
+    eventTitle: string;
+    eventDescription: string;
+  };
+
+  const submit = (values: FormValues) => {
+    console.log(values);
+  };
+
   return (
-    <Box
-      sx={{
-        width: 300,
-        padding: 2,
-        border: "1px solid #ccc",
-        borderRadius: 1,
-        backgroundColor: "#fff",
-      }}
+    <FormContainer
+      formContext={formContext}
+      defaultValues={{}}
+      onSuccess={submit}
     >
-      <Typography variant="h6" gutterBottom>
-        Event
-      </Typography>
-      <TextField
-        label="Event Title"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-      />
-      <TextField
-        label="Date"
-        type="date"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        InputLabelProps={{
-          shrink: true,
+      <Box
+        sx={{
+          width: 300,
+          p: 2,
+          border: "1px solid #ccc",
+          borderRadius: 1,
+          backgroundColor: "#fff",
+          minHeight: 1064,
         }}
-      />
-      <TextField
-        label="Time"
-        type="time"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
-      <TextField
-        label="Description"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        multiline
-        rows={4}
-      />
-      <Button variant="contained" color="primary" fullWidth>
-        Save
-      </Button>
-    </Box>
+        height={"100vh"}
+        gap={2}
+      >
+        <Stack spacing={2}>
+          <Typography variant="h6" gutterBottom>
+            Event
+          </Typography>
+          <TextFieldElement label="Event Title" name="eventTitle" required />
+          <TextareaAutosizeElement
+            label="Description"
+            name="eventDescription"
+            resizeStyle="vertical"
+            rows={3}
+          />
+          <Button variant="contained" color="primary" fullWidth type={"submit"}>
+            Save
+          </Button>
+        </Stack>
+      </Box>
+    </FormContainer>
   );
 };
 
