@@ -1,6 +1,6 @@
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useRef } from "react";
 import {
   dayjsLocalizer,
   Calendar,
@@ -14,8 +14,10 @@ import withDragAndDrop, {
 import dayjs from "dayjs";
 // and, for optional time zone support
 import timezone from "dayjs/plugin/timezone";
-import EventEditor from "./EventEditor";
+import EventEditor, { EditorHandle } from "./EventEditor";
 import Box from "@mui/material/Box";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 dayjs.extend(timezone);
 
@@ -32,11 +34,13 @@ dayjs.extend(timezone);
 
 type EventInfo = Event & { id?: string };
 
-const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+// const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
 function App() {
+  const childRef = useRef<EditorHandle>(null);
+
   const [myEvents, setMyEvents] = useState<EventInfo[]>([]);
 
   const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
@@ -95,40 +99,45 @@ function App() {
 
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
-      const title = window.prompt("New Event name");
-      if (title) {
-        setMyEvents((prev) => [
-          ...prev,
-          { id: generateId(), start, end, title },
-        ]);
-      }
+      childRef.current?.createEvent({ start, end });
+      // childRef.current?.focusField("eventTitle");
+      // const title = "New Event";
+      // if (title) {
+      //   setMyEvents((prev) => [
+      //     ...prev,
+      //     { id: generateId(), start, end, title },
+      //   ]);
+      // }
     },
     [setMyEvents]
   );
 
   const handleSelectEvent = useCallback((event: Event) => {
-    return window.alert(event.title);
+    console.log("🚀 ~ handleSelectEvent ~ event:", event);
+    childRef.current?.focusField("eventTitle");
   }, []);
 
   return (
-    <Box display="flex" gap={2} p={6}>
-      <Box flex={1}>
-        <DragAndDropCalendar
-          defaultView={Views.WEEK}
-          events={myEvents}
-          localizer={localizer}
-          popup
-          resizable={true}
-          selectable
-          views={views}
-          onSelectEvent={handleSelectEvent}
-          onEventDrop={moveEvent}
-          onEventResize={resizeEvent}
-          onSelectSlot={handleSelectSlot}
-        />
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box display="flex" gap={2} p={6}>
+        <Box flex={1}>
+          <DragAndDropCalendar
+            defaultView={Views.WEEK}
+            events={myEvents}
+            localizer={localizer}
+            popup
+            resizable={true}
+            selectable
+            views={views}
+            onSelectEvent={handleSelectEvent}
+            onEventDrop={moveEvent}
+            onEventResize={resizeEvent}
+            onSelectSlot={handleSelectSlot}
+          />
+        </Box>
+        <EventEditor ref={childRef} />
       </Box>
-      <EventEditor />
-    </Box>
+    </LocalizationProvider>
   );
 }
 

@@ -1,12 +1,34 @@
+import { forwardRef, useImperativeHandle } from "react";
 import { Box, Button, Typography, Stack } from "@mui/material";
 import {
   FormContainer,
   TextFieldElement,
   TextareaAutosizeElement,
 } from "react-hook-form-mui";
+import {
+  DatePickerElement,
+  TimePickerElement,
+} from "react-hook-form-mui/date-pickers";
 import { useForm } from "react-hook-form";
 
-const EventEditor = () => {
+type TimeSlot = {
+  start: Date;
+  end: Date;
+};
+
+export type EditorHandle = {
+  focusField: (field: string) => void;
+  createEvent: ({ start, end }: TimeSlot) => void;
+};
+
+type FormValues = {
+  eventTitle: string;
+  eventDescription: string;
+};
+
+// const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+
+const EventEditor = forwardRef((_, ref) => {
   const formContext = useForm<{ eventTitle: string; eventDescription: string }>(
     {
       defaultValues: {
@@ -16,10 +38,16 @@ const EventEditor = () => {
     }
   );
 
-  type FormValues = {
-    eventTitle: string;
-    eventDescription: string;
-  };
+  useImperativeHandle(ref, () => ({
+    focusField: (field: "eventTitle" | "eventDescription") => {
+      formContext.setFocus(field);
+    },
+    createEvent: ({ start, end }: TimeSlot) => {
+      console.log("🚀 ~ useImperativeHandle ~ end:", end);
+      console.log("🚀 ~ useImperativeHandle ~ start:", start);
+      formContext.setFocus("eventTitle");
+    },
+  }));
 
   const submit = (values: FormValues) => {
     console.log(values);
@@ -48,6 +76,15 @@ const EventEditor = () => {
             Event
           </Typography>
           <TextFieldElement label="Event Title" name="eventTitle" required />
+          <DatePickerElement label="Event Date" name="eventDate" />
+          <Stack direction="row" spacing={2}>
+            <TimePickerElement
+              label="Start Time"
+              name="eventStartTime"
+              required
+            />
+            <TimePickerElement label="End Time" name="eventEndTime" required />
+          </Stack>
           <TextareaAutosizeElement
             label="Description"
             name="eventDescription"
@@ -61,6 +98,8 @@ const EventEditor = () => {
       </Box>
     </FormContainer>
   );
-};
+});
+
+EventEditor.displayName = "EventEditor";
 
 export default EventEditor;
