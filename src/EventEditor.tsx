@@ -14,8 +14,6 @@ type TimeSlot = {
   end: Date;
 };
 
-const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
-
 export type EditorHandle = {
   focusField: (field: string) => void;
   createEvent: ({ start, end }: TimeSlot) => void;
@@ -53,7 +51,6 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
       formContext.setFocus(field, { shouldSelect: true });
     },
     createEvent: ({ id, start, end }: TimeSlot) => {
-      formContext.setFocus("eventTitle");
       formContext.setValue("eventDate", dayjs(start));
       formContext.setValue("eventStartTime", dayjs(start));
       formContext.setValue("eventEndTime", dayjs(end));
@@ -65,7 +62,7 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
     formContext.setValue("eventTitle", "");
 
     setEvent({
-      id: generateId(),
+      id: values.eventId,
       start: values.eventStartTime.toDate(),
       end: values.eventEndTime.toDate(),
       title: values.eventTitle,
@@ -111,7 +108,6 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
                 required
                 autoComplete="off"
                 label="Event Title"
-                autoFocus
               />
             )}
           />

@@ -101,6 +101,7 @@ function App() {
     ({ start, end }: { start: Date; end: Date }) => {
       const id = generateId();
       childRef.current?.createEvent({ id, start, end });
+      childRef.current?.focusField("eventTitle");
     },
     [setEvents]
   );
