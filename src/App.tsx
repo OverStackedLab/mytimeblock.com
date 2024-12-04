@@ -100,10 +100,6 @@ function App() {
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
       const id = generateId();
-      setEvents((prev) => [
-        ...prev,
-        { id: generateId(), start: start, end: end, title: "New Event" },
-      ]);
       childRef.current?.createEvent({ id, start, end });
     },
     [setEvents]
@@ -115,9 +111,8 @@ function App() {
 
   const setEvent = useCallback((event: EventInfo) => {
     setEvents((prev) => {
-      const filtered = prev.filter((ev) => ev.id !== event.id);
       return [
-        ...filtered,
+        ...prev,
         {
           id: event.id,
           start: event.start,

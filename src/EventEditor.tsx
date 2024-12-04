@@ -14,6 +14,8 @@ type TimeSlot = {
   end: Date;
 };
 
+const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+
 export type EditorHandle = {
   focusField: (field: string) => void;
   createEvent: ({ start, end }: TimeSlot) => void;
@@ -48,20 +50,22 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
 
   useImperativeHandle(ref, () => ({
     focusField: (field: "eventTitle" | "eventDescription") => {
-      formContext.setFocus(field);
+      formContext.setFocus(field, { shouldSelect: true });
     },
     createEvent: ({ id, start, end }: TimeSlot) => {
       formContext.setFocus("eventTitle");
-      formContext.setValue("eventId", id);
       formContext.setValue("eventDate", dayjs(start));
       formContext.setValue("eventStartTime", dayjs(start));
       formContext.setValue("eventEndTime", dayjs(end));
+      formContext.setValue("eventId", id);
     },
   }));
 
   const submit = (values: FormValues) => {
+    formContext.setValue("eventTitle", "");
+
     setEvent({
-      id: values.eventId,
+      id: generateId(),
       start: values.eventStartTime.toDate(),
       end: values.eventEndTime.toDate(),
       title: values.eventTitle,
@@ -99,10 +103,15 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
             control={formContext.control}
             render={({ field }) => (
               <TextField
-                {...field}
+                inputRef={field.ref}
+                name={field.name}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
                 required
                 autoComplete="off"
                 label="Event Title"
+                autoFocus
               />
             )}
           />
