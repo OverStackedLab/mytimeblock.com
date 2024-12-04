@@ -32,7 +32,7 @@ dayjs.extend(timezone);
 // - MinMax
 // - UTC
 
-type EventInfo = Event & { id?: string };
+export type EventInfo = Event & { id?: string; description?: string };
 
 // const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
@@ -41,7 +41,7 @@ const DragAndDropCalendar = withDragAndDrop(Calendar);
 function App() {
   const childRef = useRef<EditorHandle>(null);
 
-  const [myEvents, setMyEvents] = useState<EventInfo[]>([]);
+  const [events, setEvents] = useState<EventInfo[]>([]);
 
   const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
   const { views } = useMemo(
@@ -66,7 +66,7 @@ function App() {
         event.allDay = false;
       }
 
-      setMyEvents((prev) => {
+      setEvents((prev) => {
         const existing = prev.find((ev) => ev.id === event.id) ?? {};
         const filtered = prev.filter((ev) => ev.id !== event.id);
         return [
@@ -80,12 +80,12 @@ function App() {
         ];
       });
     },
-    [setMyEvents]
+    [setEvents]
   );
 
   const resizeEvent = useCallback(
     ({ event, start, end }: EventInteractionArgs<EventInfo>) => {
-      setMyEvents((prev) => {
+      setEvents((prev) => {
         const existing = prev.find((ev) => ev.id === event.id) ?? {};
         const filtered = prev.filter((ev) => ev.id !== event.id);
         return [
@@ -94,27 +94,25 @@ function App() {
         ];
       });
     },
-    [setMyEvents]
+    [setEvents]
   );
 
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
       childRef.current?.createEvent({ start, end });
-      // childRef.current?.focusField("eventTitle");
-      // const title = "New Event";
-      // if (title) {
-      //   setMyEvents((prev) => [
-      //     ...prev,
-      //     { id: generateId(), start, end, title },
-      //   ]);
-      // }
     },
-    [setMyEvents]
+    [setEvents]
   );
 
-  const handleSelectEvent = useCallback((event: Event) => {
-    console.log("🚀 ~ handleSelectEvent ~ event:", event);
-    childRef.current?.focusField("eventTitle");
+  // const handleSelectEvent = useCallback((event: Event) => {
+  //   childRef.current?.focusField("eventTitle");
+  // }, []);
+
+  const setEvent = useCallback((event: EventInfo) => {
+    setEvents((prev) => [
+      ...prev,
+      { id: event.id, start: event.start, end: event.end, title: event.title },
+    ]);
   }, []);
 
   return (
@@ -123,19 +121,19 @@ function App() {
         <Box flex={1}>
           <DragAndDropCalendar
             defaultView={Views.WEEK}
-            events={myEvents}
+            events={events}
             localizer={localizer}
             popup
             resizable={true}
             selectable
             views={views}
-            onSelectEvent={handleSelectEvent}
+            // onSelectEvent={handleSelectEvent}
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}
             onSelectSlot={handleSelectSlot}
           />
         </Box>
-        <EventEditor ref={childRef} />
+        <EventEditor ref={childRef} setEvent={setEvent} />
       </Box>
     </LocalizationProvider>
   );

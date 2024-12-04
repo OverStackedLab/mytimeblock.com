@@ -1,15 +1,12 @@
 import { forwardRef, useImperativeHandle } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import { Box, Button, Typography, Stack } from "@mui/material";
-import {
-  FormContainer,
-  TextFieldElement,
-  TextareaAutosizeElement,
-} from "react-hook-form-mui";
-import {
-  DatePickerElement,
-  TimePickerElement,
-} from "react-hook-form-mui/date-pickers";
-import { useForm } from "react-hook-form";
+import TextField from "@mui/material/TextField";
+import { DateField } from "@mui/x-date-pickers/DateField";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { TextareaAutosize } from "@mui/base/TextareaAutosize";
+import { useForm, Controller } from "react-hook-form";
+import { EventInfo } from "./App";
 
 type TimeSlot = {
   start: Date;
@@ -24,41 +21,54 @@ export type EditorHandle = {
 type FormValues = {
   eventTitle: string;
   eventDescription: string;
+  eventDate: Dayjs;
+  eventStartTime: Dayjs;
+  eventEndTime: Dayjs;
 };
 
-// const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+type EventEditorProps = {
+  setEvent: (event: EventInfo) => void;
+};
 
-const EventEditor = forwardRef((_, ref) => {
-  const formContext = useForm<{ eventTitle: string; eventDescription: string }>(
-    {
-      defaultValues: {
-        eventTitle: "",
-        eventDescription: "",
-      },
-    }
-  );
+const today = dayjs();
+
+const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+
+const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
+  const formContext = useForm<FormValues>({
+    defaultValues: {
+      eventTitle: "",
+      eventDate: today,
+      eventStartTime: today.startOf("hour"),
+      eventEndTime: today.endOf("hour").add(1, "minute"),
+      eventDescription: "",
+    },
+  });
 
   useImperativeHandle(ref, () => ({
     focusField: (field: "eventTitle" | "eventDescription") => {
       formContext.setFocus(field);
     },
     createEvent: ({ start, end }: TimeSlot) => {
-      console.log("🚀 ~ useImperativeHandle ~ end:", end);
-      console.log("🚀 ~ useImperativeHandle ~ start:", start);
       formContext.setFocus("eventTitle");
+      formContext.setValue("eventDate", dayjs(start));
+      formContext.setValue("eventStartTime", dayjs(start));
+      formContext.setValue("eventEndTime", dayjs(end));
     },
   }));
 
   const submit = (values: FormValues) => {
-    console.log(values);
+    setEvent({
+      id: generateId(),
+      start: values.eventStartTime.toDate(),
+      end: values.eventEndTime.toDate(),
+      title: values.eventTitle,
+      description: values.eventDescription,
+    });
   };
 
   return (
-    <FormContainer
-      formContext={formContext}
-      defaultValues={{}}
-      onSuccess={submit}
-    >
+    <form onSubmit={formContext.handleSubmit(submit)}>
       <Box
         sx={{
           width: 300,
@@ -75,28 +85,52 @@ const EventEditor = forwardRef((_, ref) => {
           <Typography variant="h6" gutterBottom>
             Event
           </Typography>
-          <TextFieldElement label="Event Title" name="eventTitle" required />
-          <DatePickerElement label="Event Date" name="eventDate" />
+          <Controller
+            name="eventTitle"
+            control={formContext.control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                required
+                autoComplete="off"
+                label="Event Title"
+              />
+            )}
+          />
+          <Controller
+            name="eventDate"
+            control={formContext.control}
+            render={({ field }) => {
+              return <DateField {...field} label="Event Date" />;
+            }}
+          />
           <Stack direction="row" spacing={2}>
-            <TimePickerElement
-              label="Start Time"
+            <Controller
               name="eventStartTime"
-              required
+              control={formContext.control}
+              render={({ field }) => (
+                <TimePicker {...field} label="Start Time" />
+              )}
             />
-            <TimePickerElement label="End Time" name="eventEndTime" required />
+            <Controller
+              name="eventEndTime"
+              control={formContext.control}
+              render={({ field }) => <TimePicker {...field} label="End Time" />}
+            />
           </Stack>
-          <TextareaAutosizeElement
-            label="Description"
+          <Controller
             name="eventDescription"
-            resizeStyle="vertical"
-            rows={3}
+            control={formContext.control}
+            render={({ field }) => (
+              <TextareaAutosize {...field} minRows={6} maxRows={8} />
+            )}
           />
           <Button variant="contained" color="primary" fullWidth type={"submit"}>
             Save
           </Button>
         </Stack>
       </Box>
-    </FormContainer>
+    </form>
   );
 });
 
