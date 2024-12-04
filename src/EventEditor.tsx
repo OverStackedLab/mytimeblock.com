@@ -9,6 +9,7 @@ import { useForm, Controller } from "react-hook-form";
 import { EventInfo } from "./App";
 
 type TimeSlot = {
+  id: string;
   start: Date;
   end: Date;
 };
@@ -19,6 +20,7 @@ export type EditorHandle = {
 };
 
 type FormValues = {
+  eventId: string;
   eventTitle: string;
   eventDescription: string;
   eventDate: Dayjs;
@@ -32,11 +34,10 @@ type EventEditorProps = {
 
 const today = dayjs();
 
-const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
-
 const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
   const formContext = useForm<FormValues>({
     defaultValues: {
+      eventId: "",
       eventTitle: "",
       eventDate: today,
       eventStartTime: today.startOf("hour"),
@@ -49,8 +50,9 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
     focusField: (field: "eventTitle" | "eventDescription") => {
       formContext.setFocus(field);
     },
-    createEvent: ({ start, end }: TimeSlot) => {
+    createEvent: ({ id, start, end }: TimeSlot) => {
       formContext.setFocus("eventTitle");
+      formContext.setValue("eventId", id);
       formContext.setValue("eventDate", dayjs(start));
       formContext.setValue("eventStartTime", dayjs(start));
       formContext.setValue("eventEndTime", dayjs(end));
@@ -59,7 +61,7 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
 
   const submit = (values: FormValues) => {
     setEvent({
-      id: generateId(),
+      id: values.eventId,
       start: values.eventStartTime.toDate(),
       end: values.eventEndTime.toDate(),
       title: values.eventTitle,
@@ -85,6 +87,13 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
           <Typography variant="h6" gutterBottom>
             Event
           </Typography>
+          <Controller
+            name="eventId"
+            control={formContext.control}
+            render={({ field }) => (
+              <TextField {...field} sx={{ display: "none" }} />
+            )}
+          />
           <Controller
             name="eventTitle"
             control={formContext.control}

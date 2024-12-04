@@ -34,7 +34,7 @@ dayjs.extend(timezone);
 
 export type EventInfo = Event & { id?: string; description?: string };
 
-// const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
 
@@ -99,7 +99,12 @@ function App() {
 
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
-      childRef.current?.createEvent({ start, end });
+      const id = generateId();
+      setEvents((prev) => [
+        ...prev,
+        { id: generateId(), start: start, end: end, title: "New Event" },
+      ]);
+      childRef.current?.createEvent({ id, start, end });
     },
     [setEvents]
   );
@@ -109,10 +114,18 @@ function App() {
   // }, []);
 
   const setEvent = useCallback((event: EventInfo) => {
-    setEvents((prev) => [
-      ...prev,
-      { id: event.id, start: event.start, end: event.end, title: event.title },
-    ]);
+    setEvents((prev) => {
+      const filtered = prev.filter((ev) => ev.id !== event.id);
+      return [
+        ...filtered,
+        {
+          id: event.id,
+          start: event.start,
+          end: event.end,
+          title: event.title,
+        },
+      ];
+    });
   }, []);
 
   return (
