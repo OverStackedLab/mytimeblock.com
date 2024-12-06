@@ -12,6 +12,7 @@ export default [
   { settings: { react: { version: "detect" } } },
   {
     rules: {
+      "@typescript-eslint/no-explicit-any": 2,
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
     },
