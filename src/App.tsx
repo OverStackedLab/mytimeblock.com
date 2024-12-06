@@ -14,10 +14,11 @@ import withDragAndDrop, {
 import dayjs from "dayjs";
 // and, for optional time zone support
 import timezone from "dayjs/plugin/timezone";
-import EventEditor, { EditorHandle } from "./EventEditor";
+import EventEditor, { EditorHandle } from "./components/EventEditor";
 import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import SideBar from "./components/SideBar";
 
 dayjs.extend(timezone);
 
@@ -41,7 +42,12 @@ const DragAndDropCalendar = withDragAndDrop(Calendar);
 function App() {
   const childRef = useRef<EditorHandle>(null);
 
-  const [events, setEvents] = useState<EventInfo[]>([]);
+  const [events, setEvents] = useState<EventInfo[] | []>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = (newOpen: boolean) => () => {
+    setIsSidebarOpen(newOpen);
+  };
 
   const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
   const { views } = useMemo(
@@ -100,28 +106,32 @@ function App() {
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
       const id = generateId();
-      childRef.current?.createEvent({ id, start, end });
-      childRef.current?.focusField("eventTitle");
+      setEvents((prev) => [...prev, { start, end, title: "New Event", id }]);
     },
     [setEvents]
   );
 
-  // const handleSelectEvent = useCallback((event: Event) => {
-  //   childRef.current?.focusField("eventTitle");
-  // }, []);
+  const handleSelectEvent = useCallback((event: EventInfo) => {
+    childRef.current?.updateEvent(event);
+    childRef.current?.focusField("eventTitle");
+    setIsSidebarOpen(true);
+  }, []);
 
   const setEvent = useCallback((event: EventInfo) => {
     setEvents((prev) => {
+      const existing = prev.find((ev) => ev.id === event.id) ?? {};
+      const filtered = prev.filter((ev) => ev.id !== event.id);
       return [
-        ...prev,
+        ...filtered,
         {
-          id: event.id,
+          ...existing,
           start: event.start,
           end: event.end,
           title: event.title,
         },
       ];
     });
+    setIsSidebarOpen(false);
   }, []);
 
   return (
@@ -136,13 +146,15 @@ function App() {
             resizable={true}
             selectable
             views={views}
-            // onSelectEvent={handleSelectEvent}
+            onSelectEvent={handleSelectEvent}
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}
             onSelectSlot={handleSelectSlot}
           />
         </Box>
-        <EventEditor ref={childRef} setEvent={setEvent} />
+        <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
+          <EventEditor ref={childRef} setEvent={setEvent} />
+        </SideBar>
       </Box>
     </LocalizationProvider>
   );

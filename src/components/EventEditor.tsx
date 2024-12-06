@@ -6,17 +6,13 @@ import { DateField } from "@mui/x-date-pickers/DateField";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { useForm, Controller } from "react-hook-form";
-import { EventInfo } from "./App";
+import { EventInfo } from "../App";
 
-type TimeSlot = {
-  id: string;
-  start: Date;
-  end: Date;
-};
+const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 export type EditorHandle = {
   focusField: (field: string) => void;
-  createEvent: ({ start, end }: TimeSlot) => void;
+  updateEvent: (event: EventInfo) => void;
 };
 
 type FormValues = {
@@ -50,11 +46,13 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
     focusField: (field: "eventTitle" | "eventDescription") => {
       formContext.setFocus(field, { shouldSelect: true });
     },
-    createEvent: ({ id, start, end }: TimeSlot) => {
-      formContext.setValue("eventDate", dayjs(start));
-      formContext.setValue("eventStartTime", dayjs(start));
-      formContext.setValue("eventEndTime", dayjs(end));
-      formContext.setValue("eventId", id);
+    updateEvent: (event: EventInfo) => {
+      formContext.setValue("eventTitle", (event?.title as string) || "");
+      formContext.setValue("eventDate", dayjs(event.start));
+      formContext.setValue("eventStartTime", dayjs(event.start));
+      formContext.setValue("eventEndTime", dayjs(event.end));
+      formContext.setValue("eventId", event?.id || generateId());
+      formContext.setValue("eventDescription", event?.description || "");
     },
   }));
 
