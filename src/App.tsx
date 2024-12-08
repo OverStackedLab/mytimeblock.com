@@ -19,6 +19,7 @@ import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import SideBar from "./components/SideBar";
+import Header from "./components/Header";
 
 dayjs.extend(timezone);
 
@@ -128,6 +129,7 @@ function App() {
           start: event.start,
           end: event.end,
           title: event.title,
+          description: event.description,
         },
       ];
     });
@@ -135,28 +137,31 @@ function App() {
   }, []);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box display="flex" gap={2} p={6}>
-        <Box flex={1}>
-          <DragAndDropCalendar
-            defaultView={Views.WEEK}
-            events={events}
-            localizer={localizer}
-            popup
-            resizable={true}
-            selectable
-            views={views}
-            onSelectEvent={handleSelectEvent}
-            onEventDrop={moveEvent}
-            onEventResize={resizeEvent}
-            onSelectSlot={handleSelectSlot}
-          />
+    <>
+      <Header />
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Box display="flex" gap={2} p={6}>
+          <Box flex={1}>
+            <DragAndDropCalendar
+              defaultView={Views.WEEK}
+              events={events}
+              localizer={localizer}
+              popup
+              resizable={true}
+              selectable
+              views={views}
+              onSelectEvent={handleSelectEvent}
+              onEventDrop={moveEvent}
+              onEventResize={resizeEvent}
+              onSelectSlot={handleSelectSlot}
+            />
+          </Box>
+          <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
+            <EventEditor ref={childRef} setEvent={setEvent} />
+          </SideBar>
         </Box>
-        <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
-          <EventEditor ref={childRef} setEvent={setEvent} />
-        </SideBar>
-      </Box>
-    </LocalizationProvider>
+      </LocalizationProvider>
+    </>
   );
 }
 

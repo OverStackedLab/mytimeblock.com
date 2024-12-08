@@ -73,7 +73,8 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
       <Box
         sx={{
           width: 300,
-          p: 2,
+          pt: 4,
+          px: 3,
           border: "1px solid #ccc",
           borderRadius: 1,
           backgroundColor: "#fff",
@@ -84,7 +85,7 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
       >
         <Stack spacing={2}>
           <Typography variant="h6" gutterBottom>
-            Event
+            Block
           </Typography>
           <Controller
             name="eventId"
@@ -105,7 +106,7 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
                 onBlur={field.onBlur}
                 required
                 autoComplete="off"
-                label="Event Title"
+                label="Block Title"
               />
             )}
           />
@@ -113,7 +114,7 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
             name="eventDate"
             control={formContext.control}
             render={({ field }) => {
-              return <DateField {...field} label="Event Date" />;
+              return <DateField {...field} label="Block Date" />;
             }}
           />
           <Stack direction="row" spacing={2}>

@@ -502,11 +502,6 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.8.tgz#21a907684723bbbaa5f0974cf7730bd797eb8e62"
   integrity sha512-kym7SodPp8/wloecOpcmSnWJsK7M0E5Wg8UcFA+uO4B9s5d0ywXOEro/8HM9x0rW+TljRzul/14UYz3TleT3ig==
 
-"@fontsource/roboto@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@fontsource/roboto/-/roboto-5.1.0.tgz#00230737ec09c60ae877a5e33d067c0607fdd5ba"
-  integrity sha512-cFRRC1s6RqPygeZ8Uw/acwVHqih8Czjt6Q0MwoUoDe9U3m4dH1HmNDRBZyqlMSFwgNAUKgFImncKdmDHyKpwdg==
-
 "@humanfs/core@^0.19.0":
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.0.tgz#08db7a8c73bb07673d9ebd925f2dad746411fcec"
@@ -2591,11 +2586,6 @@ react-dom@^18.3.1:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
-
-react-hook-form-mui@^7.4.0:
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form-mui/-/react-hook-form-mui-7.4.0.tgz#c64b58957836a59e6cd48e928d84afa583d8c669"
-  integrity sha512-etciyU/ZfFp1io8NUi7gxx5Eyx7q6aRdccxuqQKKo6zKo69lEj9Fy+gr6Ft6D9miIqq1VyiHy3wZoaoTcLwauA==
 
 react-hook-form@^7.53.2:
   version "7.53.2"
