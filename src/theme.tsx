@@ -4,6 +4,7 @@ import { red } from "@mui/material/colors";
 // Custom theme
 const theme = createTheme({
   colorSchemes: {
+    light: true,
     dark: true,
   },
   palette: {
