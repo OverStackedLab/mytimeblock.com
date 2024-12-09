@@ -1,29 +1,95 @@
-.light .calendar .rbc-event {
-    background-color: #ff8900;
-    border-color: #f8eb00;
 
-    &:focus {
-        border: 1px solid #f5fb94;
-        outline: 5px auto #f5fb94;
-    }
-    &:active {
-        border: 1px solid #f5fb94;
-    }
-}
 
 .light {
+    background-color: #fff;
+    /* Forms */
+    .text-area {
+        background-color: #fff;
+    }
+    /* Calendar Styles */
+    .rbc-event {
+        background-color: #ff8900;
+        border-color: #f8eb00;
+    
+        &:focus {
+            border: 1px solid #f5fb94;
+            outline: 5px auto #f5fb94;
+        }
+        &:active {
+            border: 1px solid #f5fb94;
+        }
+    }
     .rbc-today {
         background-color:#efefef;
     }
     .rbc-current-time-indicator {
         background-color: #ff5636
     }
+}
+
+.dark {
+    /* Forms */
+    .block-editor .text-area {
+        background-color: #262626;
+        color: #fff
+    }
+    background-color: #262626;
+    /* Calendar styles */
+    .rbc-event {
+        background-color: #ff8900;
+        border-color: #f8eb00;
+        &:focus {
+            border-color: #fbd100;
+        }
+    }
+    .rbc-today {
+        background-color:#434a52;
+    }
+    .rbc-current-time-indicator {
+        background-color: #ff5636
+    }
+    .rbc-time-content {
+        border-top: 1px solid #525d68;
+    }
+    .rbc-time-content > * + * > * {
+        border-left: 1px solid #525d68;
+    }
+    .rbc-timeslot-group {
+        border-bottom: 1px solid #525d68;
+    }
+    .rbc-day-slot .rbc-time-slot {
+        border-top: 1px solid #525d68;
+    }
+    .rbc-day-slot .rbc-time-slot {
+        border-top: 1px solid #525d68;
+    }
+    .rbc-toolbar button {
+        color: #efefef;
+    }
+    .rbc-toolbar button:active, .rbc-toolbar button.rbc-active {
+        color: #30353b;
+    }
+    .rbc-toolbar button:focus {
+        color: #30353b;
+    }
+    .rbc-toolbar button:hover {
+        color: #30353b;
+    }
+    .rbc-time-header-content {
+        border-left: 1px solid #525d68;
+    }
+    .rbc-time-view {
+        border: 1px solid #525d68;
+    }
+    .rbc-header {
+        border-bottom: 1px solid #525d68;
+    }
+    .rbc-header + .rbc-header {
+        border-left: 1px solid #525d68;
+    }
+    .rbc-day-bg + .rbc-day-bg {
+        border-left: 1px solid #525d68;
+    }
+
 } 
 
-.calendar .dark .rbc-event {
-    background-color: #ff8900;
-    border-color: #f8eb00;
-    &:focus {
-        border-color: #fbd100;
-    }
-}

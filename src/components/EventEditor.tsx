@@ -7,6 +7,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { useForm, Controller } from "react-hook-form";
 import { EventInfo } from "../App";
+import { useTheme } from "@mui/system";
 
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
@@ -31,6 +32,8 @@ type EventEditorProps = {
 const today = dayjs();
 
 const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
+  const theme = useTheme();
+
   const formContext = useForm<FormValues>({
     defaultValues: {
       eventId: "",
@@ -69,15 +72,18 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
   };
 
   return (
-    <form onSubmit={formContext.handleSubmit(submit)}>
+    <form
+      onSubmit={formContext.handleSubmit(submit)}
+      className={theme.palette.mode}
+    >
       <Box
+        className={"block-editor"}
         sx={{
           width: 300,
           pt: 4,
           px: 3,
-          border: "1px solid #ccc",
+          border: "gray.200",
           borderRadius: 1,
-          backgroundColor: "#fff",
           minHeight: 1064,
         }}
         height={"100vh"}
@@ -135,7 +141,12 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
             name="eventDescription"
             control={formContext.control}
             render={({ field }) => (
-              <TextareaAutosize {...field} minRows={6} maxRows={8} />
+              <TextareaAutosize
+                className="text-area"
+                {...field}
+                minRows={6}
+                maxRows={8}
+              />
             )}
           />
           <Button variant="contained" color="primary" fullWidth type={"submit"}>
