@@ -1,4 +1,26 @@
-.calendar .rbc-event {
+.light .calendar .rbc-event {
+    background-color: #ff8900;
+    border-color: #f8eb00;
+
+    &:focus {
+        border: 1px solid #f5fb94;
+        outline: 5px auto #f5fb94;
+    }
+    &:active {
+        border: 1px solid #f5fb94;
+    }
+}
+
+.light {
+    .rbc-today {
+        background-color:#efefef;
+    }
+    .rbc-current-time-indicator {
+        background-color: #ff5636
+    }
+} 
+
+.calendar .dark .rbc-event {
     background-color: #ff8900;
     border-color: #f8eb00;
     &:focus {

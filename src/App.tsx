@@ -21,6 +21,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
+import { useColorScheme } from "@mui/material/styles";
 
 dayjs.extend(timezone);
 
@@ -43,6 +44,7 @@ const DragAndDropCalendar = withDragAndDrop(Calendar);
 
 function App() {
   const childRef = useRef<EditorHandle>(null);
+  const { mode } = useColorScheme();
 
   const [events, setEvents] = useState<EventInfo[] | []>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -137,8 +139,12 @@ function App() {
     setIsSidebarOpen(false);
   }, []);
 
+  if (!mode) {
+    return <></>;
+  }
+
   return (
-    <>
+    <Box className={mode}>
       <Header />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Box display="flex" gap={2} p={6}>
@@ -162,7 +168,7 @@ function App() {
           </SideBar>
         </Box>
       </LocalizationProvider>
-    </>
+    </Box>
   );
 }
 
