@@ -1,5 +1,6 @@
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "./App.css";
 import { useCallback, useMemo, useState, useRef } from "react";
 import {
   dayjsLocalizer,
@@ -141,7 +142,7 @@ function App() {
       <Header />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Box display="flex" gap={2} p={6}>
-          <Box flex={1}>
+          <Box flex={1} className="calendar">
             <DragAndDropCalendar
               defaultView={Views.WEEK}
               events={events}

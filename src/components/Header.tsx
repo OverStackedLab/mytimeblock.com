@@ -10,7 +10,12 @@ const Header = () => {
   const { mode, setMode } = useColorScheme();
 
   return (
-    <AppBar position="static" color="inherit">
+    <AppBar
+      position="static"
+      color="inherit"
+      enableColorOnDark
+      sx={{ boxShadow: 0, borderBottom: 1, borderColor: "grey.200" }}
+    >
       <Toolbar>
         <Box flexGrow={1}>
           <Typography variant="h6">My TimeBlock</Typography>

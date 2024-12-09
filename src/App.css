@@ -1,0 +1,7 @@
+.calendar .rbc-event {
+    background-color: #ff8900;
+    border-color: #f8eb00;
+    &:focus {
+        border-color: #fbd100;
+    }
+}
