@@ -149,14 +149,25 @@ const EventEditor = forwardRef(({ setEvent }: EventEditorProps, ref) => {
               />
             )}
           />
-          <Button
-            variant="contained"
-            color="secondary"
-            fullWidth
-            type={"submit"}
-          >
-            Save
-          </Button>
+          <Stack direction="row" gap={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              type="submit"
+              disableElevation
+            >
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              fullWidth
+              disableElevation
+            >
+              Delete
+            </Button>
+          </Stack>
         </Stack>
       </Box>
     </form>
