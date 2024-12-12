@@ -56,7 +56,7 @@ function App() {
   const localizer = useMemo(() => dayjsLocalizer(dayjs), []);
   const { views } = useMemo(
     () => ({
-      views: [Views.MONTH, Views.WEEK, Views.DAY],
+      views: [Views.WEEK, Views.DAY],
     }),
     []
   );
@@ -151,12 +151,12 @@ function App() {
           <Box flex={1} className="calendar">
             <DragAndDropCalendar
               defaultView={Views.WEEK}
+              views={views}
               events={events}
               localizer={localizer}
-              popup
               resizable={true}
+              popup
               selectable
-              views={views}
               onSelectEvent={handleSelectEvent}
               onEventDrop={moveEvent}
               onEventResize={resizeEvent}
