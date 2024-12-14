@@ -1,7 +1,7 @@
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./App.css";
-import { useCallback, useMemo, useState, useRef } from "react";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import {
   dayjsLocalizer,
   Calendar,
@@ -38,6 +38,14 @@ dayjs.extend(timezone);
 
 export type EventInfo = Event & { id?: string; description?: string };
 
+const parseEvents = (events: EventInfo[]): EventInfo[] => {
+  return events.map((event) => ({
+    ...event,
+    start: new Date(event?.start ?? new Date()),
+    end: new Date(event?.end ?? new Date()),
+  }));
+};
+
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 const DragAndDropCalendar = withDragAndDrop(Calendar);
@@ -46,8 +54,18 @@ function App() {
   const childRef = useRef<EditorHandle>(null);
   const { mode } = useColorScheme();
 
-  const [events, setEvents] = useState<EventInfo[] | []>([]);
+  const [events, setEvents] = useState<EventInfo[] | []>(() => {
+    // Get the initial state from localStorage
+    const savedEvents = localStorage.getItem("events");
+    const parsedEvents = savedEvents ? JSON.parse(savedEvents) : [];
+    return parseEvents(parsedEvents);
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    // Save the user object to localStorage whenever it changes
+    localStorage.setItem("events", JSON.stringify(events || []));
+  }, [events]);
 
   const toggleSidebar = (newOpen: boolean) => () => {
     setIsSidebarOpen(newOpen);
