@@ -121,6 +121,14 @@ function App() {
     setIsSidebarOpen(true);
   }, []);
 
+  const handleDeleteEvent = useCallback((eventId: string) => {
+    setEvents((prev) => {
+      const filtered = prev.filter((event) => event.id !== eventId);
+      return filtered;
+    });
+    setIsSidebarOpen(false);
+  }, []);
+
   const setEvent = useCallback((event: EventInfo) => {
     setEvents((prev) => {
       const existing = prev.find((ev) => ev.id === event.id) ?? {};
@@ -164,7 +172,11 @@ function App() {
             />
           </Box>
           <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
-            <EventEditor ref={childRef} setEvent={setEvent} />
+            <EventEditor
+              ref={childRef}
+              setEvent={setEvent}
+              deleteEvent={handleDeleteEvent}
+            />
           </SideBar>
         </Box>
       </LocalizationProvider>
