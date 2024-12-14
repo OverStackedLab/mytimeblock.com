@@ -174,6 +174,7 @@ function App() {
           <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
             <EventEditor
               ref={childRef}
+              closeEditor={toggleSidebar(false)}
               setEvent={setEvent}
               deleteEvent={handleDeleteEvent}
             />

@@ -28,12 +28,13 @@ type FormValues = {
 type EventEditorProps = {
   setEvent: (event: EventInfo) => void;
   deleteEvent: (eventId: string) => void;
+  closeEditor: () => void;
 };
 
 const today = dayjs();
 
 const EventEditor = forwardRef(
-  ({ setEvent, deleteEvent }: EventEditorProps, ref) => {
+  ({ setEvent, deleteEvent, closeEditor }: EventEditorProps, ref) => {
     const theme = useTheme();
 
     const formContext = useForm<FormValues>({
@@ -74,108 +75,116 @@ const EventEditor = forwardRef(
     };
 
     return (
-      <form
-        onSubmit={formContext.handleSubmit(submit)}
+      <Box
         className={theme.palette.mode}
+        sx={{
+          width: 300,
+          px: 3,
+          borderRadius: 1,
+          minHeight: 1064,
+          height: "100vh",
+          backgroundColor: theme.palette.primary,
+        }}
       >
-        <Box
-          className={"block-editor"}
-          sx={{
-            width: 300,
-            pt: 4,
-            px: 3,
-            border: "gray.200",
-            borderRadius: 1,
-            minHeight: 1064,
-          }}
-          height={"100vh"}
-          gap={2}
+        <Stack
+          direction="row"
+          justifyContent="flex-end"
+          alignItems="center"
+          px={1}
+          py={2}
         >
-          <Stack spacing={2}>
-            <Typography variant="h6" gutterBottom>
-              Block
-            </Typography>
-            <Controller
-              name="eventId"
-              control={formContext.control}
-              render={({ field }) => (
-                <TextField {...field} sx={{ display: "none" }} />
-              )}
-            />
-            <Controller
-              name="eventTitle"
-              control={formContext.control}
-              render={({ field }) => (
-                <TextField
-                  inputRef={field.ref}
-                  name={field.name}
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  required
-                  autoComplete="off"
-                  label="Block Title"
-                />
-              )}
-            />
-            <Controller
-              name="eventDate"
-              control={formContext.control}
-              render={({ field }) => {
-                return <DateField {...field} label="Block Date" />;
-              }}
-            />
-            <Stack direction="row" spacing={2}>
+          <Button variant="text" onClick={closeEditor}>
+            Close
+          </Button>
+        </Stack>
+        <form onSubmit={formContext.handleSubmit(submit)}>
+          <Box gap={2}>
+            <Stack spacing={2}>
+              <Typography variant="h6" gutterBottom>
+                Block
+              </Typography>
               <Controller
-                name="eventStartTime"
+                name="eventId"
                 control={formContext.control}
                 render={({ field }) => (
-                  <TimePicker {...field} label="Start Time" />
+                  <TextField {...field} sx={{ display: "none" }} />
                 )}
               />
               <Controller
-                name="eventEndTime"
+                name="eventTitle"
                 control={formContext.control}
                 render={({ field }) => (
-                  <TimePicker {...field} label="End Time" />
+                  <TextField
+                    inputRef={field.ref}
+                    name={field.name}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    required
+                    autoComplete="off"
+                    label="Block Title"
+                  />
                 )}
               />
-            </Stack>
-            <Controller
-              name="eventDescription"
-              control={formContext.control}
-              render={({ field }) => (
-                <TextareaAutosize
-                  className="text-area"
-                  {...field}
-                  minRows={6}
-                  maxRows={8}
+              <Controller
+                name="eventDate"
+                control={formContext.control}
+                render={({ field }) => {
+                  return <DateField {...field} label="Block Date" />;
+                }}
+              />
+              <Stack direction="row" spacing={2}>
+                <Controller
+                  name="eventStartTime"
+                  control={formContext.control}
+                  render={({ field }) => (
+                    <TimePicker {...field} label="Start Time" />
+                  )}
                 />
-              )}
-            />
-            <Stack direction="row" gap={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                type="submit"
-                disableElevation
-              >
-                Save
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                fullWidth
-                disableElevation
-                onClick={() => deleteEvent(formContext.getValues("eventId"))}
-              >
-                Delete
-              </Button>
+                <Controller
+                  name="eventEndTime"
+                  control={formContext.control}
+                  render={({ field }) => (
+                    <TimePicker {...field} label="End Time" />
+                  )}
+                />
+              </Stack>
+              <Controller
+                name="eventDescription"
+                control={formContext.control}
+                render={({ field }) => (
+                  <TextareaAutosize
+                    className="text-area"
+                    {...field}
+                    minRows={4}
+                    maxRows={6}
+                  />
+                )}
+              />
+              <Stack direction="row" gap={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  type="submit"
+                  disableElevation
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  fullWidth
+                  disableElevation
+                  onClick={() => deleteEvent(formContext.getValues("eventId"))}
+                >
+                  Delete
+                </Button>
+              </Stack>
             </Stack>
-          </Stack>
-        </Box>
-      </form>
+          </Box>
+        </form>
+      </Box>
     );
   }
 );

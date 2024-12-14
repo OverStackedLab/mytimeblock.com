@@ -2,6 +2,13 @@
     background-color: #fafafa;
     /* Forms */
     .text-area {
+        box-sizing: border-box;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        padding: 12px;
+        border-radius: 12px 12px 0 12px;
+        border: 1px solid #0000003b;
         background-color: #fafafa;
     }
     /* Calendar Styles */
@@ -30,7 +37,14 @@
     /* Forms */
     .text-area {
         background-color: #212121;
-        color: #fafafa
+        box-sizing: border-box;
+        font-size: 0.875rem;
+        font-weight: 400;
+        line-height: 1.5;
+        padding: 12px;
+        border-radius: 12px 12px 0 12px;
+        border: 1px solid #ffffff3b;
+        color: #fff
     }
     /* Calendar styles */
     .rbc-event {
@@ -53,46 +67,43 @@
     }
 
     .rbc-time-content {
-        border-top: 1px solid #434343;
+        border-top: 1px solid #424242;
     }
     .rbc-time-content > * + * > * {
-        border-left: 1px solid #434343;
+        border-left: 1px solid #424242;
     }
     .rbc-timeslot-group {
-        border-bottom: 1px solid #434343;
+        border-bottom: 1px solid #424242;
     }
     .rbc-day-slot .rbc-time-slot {
-        border-top: 1px solid #434343;
-    }
-    .rbc-day-slot .rbc-time-slot {
-        border-top: 1px solid #434343;
+        border-top: 1px solid #424242;
     }
     .rbc-toolbar button {
         color: #fafafa;
     }
     .rbc-toolbar button:active, .rbc-toolbar button.rbc-active {
-        color: #434343;
+        color: #424242;
     }
     .rbc-toolbar button:focus {
-        color: #434343;
+        color: #424242;
     }
     .rbc-toolbar button:hover {
-        color: #434343;
+        color: #424242;
     }
     .rbc-time-header-content {
-        border-left: 1px solid #434343;
+        border-left: 1px solid #424242;
     }
     .rbc-time-view {
-        border: 1px solid #434343;
+        border: 1px solid #424242;
     }
     .rbc-header {
-        border-bottom: 1px solid #434343;
+        border-bottom: 1px solid #424242;
     }
     .rbc-header + .rbc-header {
-        border-left: 1px solid #434343;
+        border-left: 1px solid #424242;
     }
     .rbc-day-bg + .rbc-day-bg {
-        border-left: 1px solid #434343;
+        border-left: 1px solid #424242;
     }
 
 } 
