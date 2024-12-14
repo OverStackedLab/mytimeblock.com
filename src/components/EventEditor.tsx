@@ -78,7 +78,7 @@ const EventEditor = forwardRef(
       <Box
         className={theme.palette.mode}
         sx={{
-          width: 300,
+          width: 360,
           px: 3,
           borderRadius: 1,
           minHeight: 1064,
@@ -88,11 +88,11 @@ const EventEditor = forwardRef(
       >
         <Stack
           direction="row"
-          justifyContent="flex-end"
+          justifyContent="space-between"
           alignItems="center"
-          px={1}
           py={2}
         >
+          <Typography variant="h6">Edit Block</Typography>
           <Button variant="text" onClick={closeEditor}>
             Close
           </Button>
@@ -100,9 +100,6 @@ const EventEditor = forwardRef(
         <form onSubmit={formContext.handleSubmit(submit)}>
           <Box gap={2}>
             <Stack spacing={2}>
-              <Typography variant="h6" gutterBottom>
-                Block
-              </Typography>
               <Controller
                 name="eventId"
                 control={formContext.control}
