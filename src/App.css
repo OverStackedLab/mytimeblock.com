@@ -18,7 +18,7 @@
     
         &:focus {
             border: 1px solid #ffd180;
-            outline: 5px auto #ffd180;
+            outline: 6px auto #ffd180;
         }
         &:active {
             border: 1px solid #ffd180;
@@ -26,6 +26,7 @@
     }
     .rbc-event.rbc-selected {
         background-color: #ff6d00;
+        outline: 6px auto #ffd180;
     }
     .rbc-day-slot .rbc-event, .rbc-day-slot .rbc-background-event {
         border: 1px solid #ef6c00;
@@ -59,14 +60,15 @@
     
         &:focus {
             border: 1px solid #ffd180;
-            outline: 5px auto #ffd180;
+            outline: 6px auto #ffd180;
         }
         &:active {
             border: 1px solid #ffd180;
         }
     }
-    .rbc-event .rbc-selected {
+    .rbc-event.rbc-selected {
         background-color: #ff6d00;
+        outline: 6px auto #ffd180;
     }
     .rbc-today {
         background-color:#000;

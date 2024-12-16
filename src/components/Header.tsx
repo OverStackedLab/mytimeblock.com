@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import timeBlock from "../assets/timeBlock.png";
+import timeblock from "../assets/timeblock.png";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
@@ -21,7 +21,7 @@ const Header = () => {
         <Box flexGrow={1}>
           <Box display="flex" gap={1}>
             <img
-              src={timeBlock}
+              src={timeblock}
               width={20}
               height={30}
               style={{ objectFit: "contain" }}
