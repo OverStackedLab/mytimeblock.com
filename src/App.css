@@ -24,6 +24,12 @@
             border: 1px solid #ffd180;
         }
     }
+    .rbc-event.rbc-selected {
+        background-color: #ff6d00;
+    }
+    .rbc-day-slot .rbc-event, .rbc-day-slot .rbc-background-event {
+        border: 1px solid #ef6c00;
+    }
     .rbc-today {
         background-color:#f5f5f5;
     }
@@ -58,6 +64,9 @@
         &:active {
             border: 1px solid #ffd180;
         }
+    }
+    .rbc-event .rbc-selected {
+        background-color: #ff6d00;
     }
     .rbc-today {
         background-color:#000;
