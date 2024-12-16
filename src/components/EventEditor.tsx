@@ -6,7 +6,7 @@ import { DateField } from "@mui/x-date-pickers/DateField";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { useForm, Controller } from "react-hook-form";
-import { EventInfo } from "../App";
+import { EventInfo } from "./Calendar";
 import { useTheme } from "@mui/system";
 
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();

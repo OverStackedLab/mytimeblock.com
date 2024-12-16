@@ -1,6 +1,5 @@
 import "./App.css";
 import Box from "@mui/material/Box";
-
 import { useColorScheme } from "@mui/material/styles";
 import Calendar from "./components/Calendar";
 import Header from "./components/Header";
