@@ -58,6 +58,7 @@ const BlockCalendar = () => {
     const parsedEvents = savedEvents ? JSON.parse(savedEvents) : [];
     return parseEvents(parsedEvents);
   });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -84,12 +85,19 @@ const BlockCalendar = () => {
       end,
       isAllDay: droppedOnAllDaySlot = false,
     }: EventInteractionArgs<EventInfo>) => {
-      const { allDay } = event;
-      if (!allDay && droppedOnAllDaySlot) {
+      const eventStartTime = dayjs(start);
+      let eventEndTime = dayjs(end);
+
+      if (droppedOnAllDaySlot) {
         event.allDay = true;
       }
-      if (allDay && !droppedOnAllDaySlot) {
+      if (!droppedOnAllDaySlot) {
         event.allDay = false;
+        eventEndTime = eventEndTime
+          .set("year", eventStartTime.year())
+          .set("month", eventStartTime.month())
+          .set("date", eventStartTime.date())
+          .add(30, "minute");
       }
 
       setEvents((prev) => {
@@ -99,8 +107,8 @@ const BlockCalendar = () => {
           ...filtered,
           {
             ...existing,
-            start: new Date(start),
-            end: new Date(end),
+            start: eventStartTime.toDate(),
+            end: eventEndTime.toDate(),
             allDay: event.allDay,
           },
         ];
