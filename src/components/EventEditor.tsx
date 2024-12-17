@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { Box, Button, Typography, Stack } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { DateField } from "@mui/x-date-pickers/DateField";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { useForm, Controller } from "react-hook-form";
@@ -65,10 +65,30 @@ const EventEditor = forwardRef(
     const submit = (values: FormValues) => {
       formContext.setValue("eventTitle", "");
 
+      const eventDate = dayjs(values.eventDate);
+      let eventStartTime = dayjs(values.eventStartTime);
+      let eventEndTime = dayjs(values.eventEndTime);
+
+      const isSameDate = dayjs(values.eventStartTime).isSame(
+        values.eventDate,
+        "day"
+      );
+      if (!isSameDate) {
+        // Ensure eventEndTime matches the same date as eventDate
+        eventStartTime = eventStartTime
+          .set("year", eventDate.year())
+          .set("month", eventDate.month())
+          .set("date", eventDate.date());
+        eventEndTime = eventEndTime
+          .set("year", eventDate.year())
+          .set("month", eventDate.month())
+          .set("date", eventDate.date());
+      }
+
       setEvent({
         id: values.eventId,
-        start: values.eventStartTime.toDate(),
-        end: values.eventEndTime.toDate(),
+        start: eventStartTime.toDate(),
+        end: eventEndTime.toDate(),
         title: values.eventTitle,
         description: values.eventDescription,
       });
@@ -127,7 +147,13 @@ const EventEditor = forwardRef(
                 name="eventDate"
                 control={formContext.control}
                 render={({ field }) => {
-                  return <DateField {...field} label="Block Date" />;
+                  return (
+                    <DatePicker
+                      {...field}
+                      label="Block Date"
+                      onChange={field.onChange}
+                    />
+                  );
                 }}
               />
               <Stack direction="row" spacing={2}>
