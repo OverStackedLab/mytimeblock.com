@@ -11,6 +11,9 @@ const theme = createTheme({
         error: {
           main: red.A400,
         },
+        background: {
+          default: "#fafafa",
+        },
       },
     },
     dark: {
@@ -19,6 +22,9 @@ const theme = createTheme({
         secondary: orange,
         error: {
           main: red.A400,
+        },
+        background: {
+          default: "#212121",
         },
       },
     },
