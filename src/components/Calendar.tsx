@@ -63,6 +63,7 @@ const BlockCalendar = () => {
     return parseEvents(parsedEvents);
   });
 
+  const [selected, setSelected] = useState<EventInfo | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -146,7 +147,11 @@ const BlockCalendar = () => {
   }, []);
 
   const handleSelectSlot = useCallback(
-    ({ start, end }: { start: Date; end: Date }) => {
+    ({ start, end, action }: { start: Date; end: Date; action: string }) => {
+      setSelected(null);
+      if (action === "click") {
+        return;
+      }
       const id = generateId();
       setEvents((prev) => [...prev, { start, end, title: "New Event", id }]);
     },
@@ -154,8 +159,10 @@ const BlockCalendar = () => {
   );
 
   const handleSelectEvent = useCallback((event: EventInfo) => {
+    setSelected(event);
     childRef.current?.updateEvent(event);
     childRef.current?.focusField("eventTitle");
+
     setIsSidebarOpen(true);
   }, []);
 
@@ -201,12 +208,13 @@ const BlockCalendar = () => {
             localizer={localizer}
             resizable
             popup
-            selectable
+            selectable={"ignoreEvents"}
             onSelectEvent={handleSelectEvent}
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}
             onSelectSlot={handleSelectSlot}
             eventPropGetter={eventPropGetter}
+            selected={selected}
           />
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
