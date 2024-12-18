@@ -79,11 +79,14 @@ const EventEditor = forwardRef(
         formContext.setValue("eventEndTime", dayjs(event.end));
         formContext.setValue("eventId", event?.id || generateId());
         formContext.setValue("eventDescription", event?.description || "");
+        formContext.setValue("eventColor", event?.color || orange[700]);
+        setColor(event?.color || orange[700]);
       },
     }));
 
     const submit = (values: FormValues) => {
       formContext.setValue("eventTitle", "");
+      setColor(orange[700]);
 
       const eventDate = dayjs(values.eventDate);
       let eventStartTime = dayjs(values.eventStartTime);
