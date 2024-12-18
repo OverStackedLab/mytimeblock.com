@@ -34,7 +34,11 @@ dayjs.extend(timezone);
 // - MinMax
 // - UTC
 
-export type EventInfo = Event & { id?: string; description?: string };
+export type EventInfo = Event & {
+  id?: string;
+  description?: string;
+  color?: string;
+};
 
 const parseEvents = (events: EventInfo[]): EventInfo[] => {
   return events.map((event) => ({
@@ -131,6 +135,16 @@ const BlockCalendar = () => {
     [setEvents]
   );
 
+  const eventPropGetter = useCallback((event: EventInfo) => {
+    return {
+      ...(event.color && {
+        style: {
+          backgroundColor: event.color,
+        },
+      }),
+    };
+  }, []);
+
   const handleSelectSlot = useCallback(
     ({ start, end }: { start: Date; end: Date }) => {
       const id = generateId();
@@ -165,6 +179,7 @@ const BlockCalendar = () => {
           end: event.end,
           title: event.title,
           description: event.description,
+          color: event.color,
         },
       ];
     });
@@ -191,6 +206,7 @@ const BlockCalendar = () => {
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}
             onSelectSlot={handleSelectSlot}
+            eventPropGetter={eventPropGetter}
           />
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>

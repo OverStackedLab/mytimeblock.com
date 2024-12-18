@@ -1,13 +1,29 @@
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { Box, Button, Typography, Stack } from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import type { EventInfo } from "./Calendar";
+import { useTheme } from "@mui/system";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
 import TextField from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
-import { useForm, Controller } from "react-hook-form";
-import { EventInfo } from "./Calendar";
-import { useTheme } from "@mui/system";
+import CircleIcon from "@mui/icons-material/Circle";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import {
+  blue,
+  green,
+  grey,
+  orange,
+  purple,
+  red,
+  yellow,
+} from "@mui/material/colors";
 
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
@@ -23,6 +39,7 @@ type FormValues = {
   eventDate: Dayjs;
   eventStartTime: Dayjs;
   eventEndTime: Dayjs;
+  eventColor: string;
 };
 
 type EventEditorProps = {
@@ -45,8 +62,11 @@ const EventEditor = forwardRef(
         eventStartTime: today.startOf("hour"),
         eventEndTime: today.endOf("hour").add(1, "minute"),
         eventDescription: "",
+        eventColor: "#ff6d00",
       },
     });
+
+    const [color, setColor] = useState<string>(orange[700]);
 
     useImperativeHandle(ref, () => ({
       focusField: (field: "eventTitle" | "eventDescription") => {
@@ -91,6 +111,7 @@ const EventEditor = forwardRef(
         end: eventEndTime.toDate(),
         title: values.eventTitle,
         description: values.eventDescription,
+        color: color,
       });
     };
 
@@ -184,6 +205,81 @@ const EventEditor = forwardRef(
                   />
                 )}
               />
+              <Box py={2}>
+                <Controller
+                  name="eventColor"
+                  control={formContext.control}
+                  render={({ field }) => (
+                    <RadioGroup
+                      {...field}
+                      row
+                      value={color}
+                      sx={{ flex: 1, justifyContent: "space-evenly" }}
+                      onChange={(event) => {
+                        field.onChange(event.target.value);
+                        setColor(event.target.value);
+                      }}
+                    >
+                      <Radio
+                        disableRipple
+                        value={red[500]}
+                        icon={<CircleIcon sx={{ color: red[500] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: red[500] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={orange[700]}
+                        icon={<CircleIcon sx={{ color: orange[700] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: orange[700] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={yellow[600]}
+                        icon={<CircleIcon sx={{ color: yellow[600] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: yellow[600] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={green[500]}
+                        icon={<CircleIcon sx={{ color: green[500] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: green[500] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={blue[500]}
+                        icon={<CircleIcon sx={{ color: blue[500] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: blue[500] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={purple[400]}
+                        icon={<CircleIcon sx={{ color: purple[400] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: purple[400] }} />
+                        }
+                      />
+                      <Radio
+                        disableRipple
+                        value={grey[500]}
+                        icon={<CircleIcon sx={{ color: grey[500] }} />}
+                        checkedIcon={
+                          <CheckCircleIcon sx={{ color: grey[500] }} />
+                        }
+                      />
+                    </RadioGroup>
+                  )}
+                />
+              </Box>
               <Stack direction="row" gap={2}>
                 <Button
                   variant="contained"
