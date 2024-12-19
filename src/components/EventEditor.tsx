@@ -40,6 +40,8 @@ type FormValues = {
   eventStartTime: Dayjs;
   eventEndTime: Dayjs;
   eventColor: string;
+  eventStartDate?: Dayjs;
+  eventEndDate?: Dayjs;
 };
 
 type EventEditorProps = {
@@ -53,6 +55,7 @@ const today = dayjs();
 const EventEditor = forwardRef(
   ({ setEvent, deleteEvent, closeEditor }: EventEditorProps, ref) => {
     const theme = useTheme();
+    const [allDay, setAllDay] = useState(false);
 
     const formContext = useForm<FormValues>({
       defaultValues: {
@@ -80,7 +83,12 @@ const EventEditor = forwardRef(
         formContext.setValue("eventId", event?.id || generateId());
         formContext.setValue("eventDescription", event?.description || "");
         formContext.setValue("eventColor", event?.color || orange[700]);
+        if (event?.allDay) {
+          formContext.setValue("eventStartDate", dayjs(event.start));
+          formContext.setValue("eventEndDate", dayjs(event.end));
+        }
         setColor(event?.color || orange[700]);
+        setAllDay(event?.allDay || false);
       },
     }));
 
@@ -167,19 +175,50 @@ const EventEditor = forwardRef(
                   />
                 )}
               />
-              <Controller
-                name="eventDate"
-                control={formContext.control}
-                render={({ field }) => {
-                  return (
-                    <DatePicker
-                      {...field}
-                      label="Block Date"
-                      onChange={field.onChange}
-                    />
-                  );
-                }}
-              />
+              {allDay ? (
+                <Stack direction="row" spacing={2}>
+                  <Controller
+                    name="eventStartDate"
+                    control={formContext.control}
+                    render={({ field }) => {
+                      return (
+                        <DatePicker
+                          {...field}
+                          label="Start Date"
+                          onChange={field.onChange}
+                        />
+                      );
+                    }}
+                  />
+                  <Controller
+                    name="eventEndDate"
+                    control={formContext.control}
+                    render={({ field }) => {
+                      return (
+                        <DatePicker
+                          {...field}
+                          label="End Date"
+                          onChange={field.onChange}
+                        />
+                      );
+                    }}
+                  />
+                </Stack>
+              ) : (
+                <Controller
+                  name="eventDate"
+                  control={formContext.control}
+                  render={({ field }) => {
+                    return (
+                      <DatePicker
+                        {...field}
+                        label="Block Date"
+                        onChange={field.onChange}
+                      />
+                    );
+                  }}
+                />
+              )}
               <Stack direction="row" spacing={2}>
                 <Controller
                   name="eventStartTime"

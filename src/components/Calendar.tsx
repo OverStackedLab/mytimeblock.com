@@ -14,6 +14,8 @@ import withDragAndDrop, {
 import dayjs from "dayjs";
 // and, for optional time zone support
 import timezone from "dayjs/plugin/timezone";
+import duration from "dayjs/plugin/duration";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import EventEditor, { EditorHandle } from "./EventEditor";
 import Box from "@mui/material/Box";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -22,6 +24,8 @@ import SideBar from "./SideBar";
 import { useColorScheme } from "@mui/material/styles";
 
 dayjs.extend(timezone);
+dayjs.extend(duration);
+dayjs.extend(customParseFormat);
 
 // end optional time zone support
 
@@ -149,11 +153,22 @@ const BlockCalendar = () => {
   const handleSelectSlot = useCallback(
     ({ start, end, action }: { start: Date; end: Date; action: string }) => {
       setSelected(null);
+      const d = dayjs.duration(dayjs(end).diff(dayjs(start)));
+      const hours = d.hours();
+      let allDay = false;
+
+      if (hours >= 24) {
+        allDay = true;
+      }
       if (action === "click") {
         return;
       }
+
       const id = generateId();
-      setEvents((prev) => [...prev, { start, end, title: "New Event", id }]);
+      setEvents((prev) => [
+        ...prev,
+        { start, end, title: "New Event", id, allDay: allDay },
+      ]);
     },
     [setEvents]
   );
@@ -162,7 +177,6 @@ const BlockCalendar = () => {
     setSelected(event);
     childRef.current?.updateEvent(event);
     childRef.current?.focusField("eventTitle");
-
     setIsSidebarOpen(true);
   }, []);
 
@@ -215,6 +229,9 @@ const BlockCalendar = () => {
             onSelectSlot={handleSelectSlot}
             eventPropGetter={eventPropGetter}
             selected={selected}
+            allDayAccessor={(event: EventInfo) => {
+              return !!event.allDay;
+            }}
           />
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
