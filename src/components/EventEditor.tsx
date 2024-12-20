@@ -65,7 +65,7 @@ const EventEditor = forwardRef(
         eventStartTime: today.startOf("hour"),
         eventEndTime: today.endOf("hour").add(30, "minute"),
         eventDescription: "",
-        eventColor: "#ff6d00",
+        eventColor: orange[700],
       },
     });
 

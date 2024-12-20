@@ -94,15 +94,19 @@ const BlockCalendar = () => {
       end,
       isAllDay: droppedOnAllDaySlot = false,
     }: EventInteractionArgs<EventInfo>) => {
-      const eventStartTime = dayjs(start);
+      let eventStartTime = dayjs(start);
       let eventEndTime = dayjs(end);
 
       if (droppedOnAllDaySlot) {
         event.allDay = true;
+        // Set start time to midnight of the start day
+        eventStartTime = eventStartTime.startOf("day");
+        // Set end time to midnight of the next day
+        eventEndTime = eventStartTime.add(1, "day");
       }
       if (!droppedOnAllDaySlot) {
         event.allDay = false;
-        eventEndTime = eventEndTime
+        eventEndTime = eventStartTime
           .set("year", eventStartTime.year())
           .set("month", eventStartTime.month())
           .set("date", eventStartTime.date())
@@ -173,10 +177,10 @@ const BlockCalendar = () => {
   );
 
   const handleSelectEvent = useCallback((event: EventInfo) => {
-    setSelected(event);
+    setIsSidebarOpen(true);
     childRef.current?.updateEvent(event);
     childRef.current?.focusField("eventTitle");
-    setIsSidebarOpen(true);
+    setSelected(event);
   }, []);
 
   const handleDeleteEvent = useCallback((eventId: string) => {
