@@ -154,7 +154,7 @@ const BlockCalendar = () => {
     ({ start, end, action }: { start: Date; end: Date; action: string }) => {
       setSelected(null);
       const d = dayjs.duration(dayjs(end).diff(dayjs(start)));
-      const hours = d.hours();
+      const hours = d.asHours();
       let allDay = false;
 
       if (hours >= 24) {
@@ -163,7 +163,6 @@ const BlockCalendar = () => {
       if (action === "click") {
         return;
       }
-
       const id = generateId();
       setEvents((prev) => [
         ...prev,
