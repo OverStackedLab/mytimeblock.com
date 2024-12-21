@@ -4,7 +4,7 @@ import { Context } from "../context/AuthContext";
 const Protected = ({ children }: { children: ReactNode }) => {
   const { user } = useContext(Context);
 
-  if (!user) {
+  if (!user || user.emailVerified === false) {
     return <Navigate to="/" replace />;
   } else {
     return children;

@@ -8,7 +8,10 @@ import {
   Alert,
   Paper,
 } from "@mui/material";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { auth } from "../firebase/config";
 import Header from "../components/Header";
 
@@ -54,6 +57,10 @@ const SignUp = () => {
       );
       setSuccess("Account created successfully!");
       setFormData({ email: "", password: "", confirmPassword: "" });
+      const user = auth.currentUser;
+      if (user) {
+        sendEmailVerification(user);
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
