@@ -9,6 +9,7 @@ import {
   Paper,
   Link,
 } from "@mui/material";
+import { useNavigate } from "react-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { Link as RouterLink } from "react-router";
@@ -22,7 +23,7 @@ type LoginFormData = {
 
 const Login = () => {
   const { mode } = useColorScheme();
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -43,10 +44,16 @@ const Login = () => {
     setError("");
     setSuccess("");
 
+    if (!formData.email.trim() || !formData.password.trim()) {
+      setError("Email and password are required");
+      return;
+    }
+
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       setSuccess("Logged in successfully!");
       setFormData({ email: "", password: "" });
+      navigate("/dashboard");
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
