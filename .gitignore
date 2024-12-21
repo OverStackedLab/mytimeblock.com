@@ -91,3 +91,7 @@ node_modules/
 
 # dotenv environment variables file
 .env
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

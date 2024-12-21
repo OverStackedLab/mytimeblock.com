@@ -9,10 +9,9 @@ import {
   Paper,
   Link,
 } from "@mui/material";
-import { useNavigate } from "react-router";
+import { Link as RouterLink, useNavigate } from "react-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
-import { Link as RouterLink } from "react-router";
 import Header from "../components/Header";
 import { useColorScheme } from "@mui/material/styles";
 
