@@ -69,7 +69,7 @@ const Header = () => {
           />
           {user && (
             <Button
-              variant="outlined"
+              variant="text"
               color="inherit"
               onClick={handleSignOut}
               size="small"
