@@ -23,7 +23,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import SideBar from "./SideBar";
 import { useColorScheme } from "@mui/material/styles";
 import { db } from "../firebase/config";
-import { doc, setDoc, collection } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { useContext } from "react";
 import { Context } from "../context/AuthContext";
 
@@ -49,11 +49,19 @@ export type EventInfo = Event & {
   userId?: string;
 };
 
+import { Timestamp } from "firebase/firestore";
+
 const parseEvents = (events: EventInfo[]): EventInfo[] => {
   return events.map((event) => ({
     ...event,
-    start: new Date(event?.start ?? new Date()),
-    end: new Date(event?.end ?? new Date()),
+    start:
+      event.start instanceof Timestamp
+        ? event.start.toDate()
+        : new Date(event.start || new Date()),
+    end:
+      event.end instanceof Timestamp
+        ? event.end.toDate()
+        : new Date(event.end || new Date()),
   }));
 };
 
@@ -66,21 +74,47 @@ const BlockCalendar = () => {
   const { mode } = useColorScheme();
   const { user } = useContext(Context);
 
-  const [events, setEvents] = useState<EventInfo[] | []>(() => {
-    // Get the initial state from localStorage
-    const savedEvents = localStorage.getItem("events");
-    const parsedEvents = savedEvents ? JSON.parse(savedEvents) : [];
-    return parseEvents(parsedEvents);
-  });
+  const [events, setEvents] = useState<EventInfo[] | []>([]);
 
   const [selected, setSelected] = useState<EventInfo | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+
+  // Replace the existing events initialization with this useEffect
   useEffect(() => {
-    // Save the user object to localStorage whenever it changes
-    localStorage.setItem("events", JSON.stringify(events || []));
-    saveToFirestore(events);
-  }, [events]);
+    const fetchEvents = async () => {
+      if (!user) return;
+
+      try {
+        if (adminEmail === user.email) {
+          const userEventsRef = doc(collection(db, "userEvents"), user.uid);
+          const docSnap = await getDoc(userEventsRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setEvents(parseEvents(data.events || []));
+          }
+        } else {
+          const savedEvents = localStorage.getItem("events");
+          const parsedEvents = savedEvents ? JSON.parse(savedEvents) : [];
+          setEvents(parseEvents(parsedEvents || []));
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, [user]);
+
+  // useEffect(() => {
+  //   // Save the user object to localStorage whenever it changes
+  //   if (adminEmail === user?.email) {
+  //     saveToFirestore(events);
+  //   } else {
+  //     localStorage.setItem("events", JSON.stringify(events || []));
+  //   }
+  // }, [events]);
 
   const toggleSidebar = (newOpen: boolean) => () => {
     setIsSidebarOpen(newOpen);
@@ -101,7 +135,6 @@ const BlockCalendar = () => {
       end,
       isAllDay: droppedOnAllDaySlot = false,
     }: EventInteractionArgs<EventInfo>) => {
-      console.log("🚀 ~ BlockCalendar ~ event:", event);
       let eventStartTime = dayjs(start);
       let eventEndTime = dayjs(end);
 
@@ -174,8 +207,8 @@ const BlockCalendar = () => {
   const handleSelectSlot = useCallback(
     ({ start, end, action }: { start: Date; end: Date; action: string }) => {
       setSelected(null);
-      const d = dayjs.duration(dayjs(end).diff(dayjs(start)));
-      const hours = d.asHours();
+      const dateDiff = dayjs.duration(dayjs(end).diff(dayjs(start)));
+      const hours = dateDiff.asHours();
       let allDay = false;
 
       if (hours >= 24) {
@@ -185,10 +218,13 @@ const BlockCalendar = () => {
         return;
       }
       const id = generateId();
-      setEvents((prev) => [
-        ...prev,
-        { start, end, title: "New Event", id, allDay: allDay },
-      ]);
+      setEvents((prev) => {
+        const newEvents = [
+          ...prev,
+          { start, end, title: "New Event", id, allDay: allDay },
+        ];
+        return newEvents;
+      });
     },
     [setEvents]
   );
@@ -227,21 +263,23 @@ const BlockCalendar = () => {
     setIsSidebarOpen(false);
   }, []);
 
-  const saveToFirestore = useCallback(
-    async (events: EventInfo[]) => {
-      if (!user) {
-        return;
-      }
+  const saveEvents = useCallback(
+    async (eventsToSave: EventInfo[]) => {
+      if (!user) return;
+
       try {
         const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
-        // Admin users save to a global events collection
         if (adminEmail === user.email) {
-          const globalEventsRef = doc(collection(db, "globalEvents"), "shared");
-          await setDoc(globalEventsRef, { events }, { merge: true });
-        } else {
-          // Regular users save to their personal events collection
+          // Save to Firebase if admin
           const userEventsRef = doc(collection(db, "userEvents"), user.uid);
-          await setDoc(userEventsRef, { events }, { merge: true });
+          await setDoc(
+            userEventsRef,
+            { events: eventsToSave },
+            { merge: true }
+          );
+        } else {
+          // Save to localStorage if not admin
+          localStorage.setItem("events", JSON.stringify(eventsToSave));
         }
       } catch (error) {
         console.error("Error saving events:", error);
@@ -249,6 +287,13 @@ const BlockCalendar = () => {
     },
     [user]
   );
+
+  // Add this useEffect to save events whenever they change
+  useEffect(() => {
+    if (events.length > 0) {
+      saveEvents(events);
+    }
+  }, [events, saveEvents]);
 
   if (!mode) {
     return <></>;
