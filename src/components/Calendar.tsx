@@ -22,6 +22,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import SideBar from "./SideBar";
 import { useColorScheme } from "@mui/material/styles";
+import { db } from "../firebase/config";
+import { doc, setDoc, collection } from "firebase/firestore";
+import { useContext } from "react";
+import { Context } from "../context/AuthContext";
 
 dayjs.extend(timezone);
 dayjs.extend(duration);
@@ -42,6 +46,7 @@ export type EventInfo = Event & {
   id?: string;
   description?: string;
   color?: string;
+  userId?: string;
 };
 
 const parseEvents = (events: EventInfo[]): EventInfo[] => {
@@ -59,6 +64,7 @@ const DragAndDropCalendar = withDragAndDrop(Calendar);
 const BlockCalendar = () => {
   const childRef = useRef<EditorHandle>(null);
   const { mode } = useColorScheme();
+  const { user } = useContext(Context);
 
   const [events, setEvents] = useState<EventInfo[] | []>(() => {
     // Get the initial state from localStorage
@@ -73,6 +79,7 @@ const BlockCalendar = () => {
   useEffect(() => {
     // Save the user object to localStorage whenever it changes
     localStorage.setItem("events", JSON.stringify(events || []));
+    saveToFirestore(events);
   }, [events]);
 
   const toggleSidebar = (newOpen: boolean) => () => {
@@ -94,17 +101,27 @@ const BlockCalendar = () => {
       end,
       isAllDay: droppedOnAllDaySlot = false,
     }: EventInteractionArgs<EventInfo>) => {
+      console.log("🚀 ~ BlockCalendar ~ event:", event);
       let eventStartTime = dayjs(start);
       let eventEndTime = dayjs(end);
 
-      if (droppedOnAllDaySlot) {
+      if (!event.allDay && droppedOnAllDaySlot) {
         event.allDay = true;
         // Set start time to midnight of the start day
         eventStartTime = eventStartTime.startOf("day");
         // Set end time to midnight of the next day
         eventEndTime = eventStartTime.add(1, "day");
       }
-      if (!droppedOnAllDaySlot) {
+
+      if (event.allDay && droppedOnAllDaySlot) {
+        event.allDay = true;
+        // Set start time to midnight of the start day
+        eventStartTime = eventStartTime.startOf("day");
+        // Set end time to midnight of the next day
+        eventEndTime = eventStartTime.add(1, "day");
+      }
+
+      if (event.allDay && !droppedOnAllDaySlot) {
         event.allDay = false;
         eventEndTime = eventStartTime
           .set("year", eventStartTime.year())
@@ -209,6 +226,29 @@ const BlockCalendar = () => {
     });
     setIsSidebarOpen(false);
   }, []);
+
+  const saveToFirestore = useCallback(
+    async (events: EventInfo[]) => {
+      if (!user) {
+        return;
+      }
+      try {
+        const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+        // Admin users save to a global events collection
+        if (adminEmail === user.email) {
+          const globalEventsRef = doc(collection(db, "globalEvents"), "shared");
+          await setDoc(globalEventsRef, { events }, { merge: true });
+        } else {
+          // Regular users save to their personal events collection
+          const userEventsRef = doc(collection(db, "userEvents"), user.uid);
+          await setDoc(userEventsRef, { events }, { merge: true });
+        }
+      } catch (error) {
+        console.error("Error saving events:", error);
+      }
+    },
+    [user]
+  );
 
   if (!mode) {
     return <></>;

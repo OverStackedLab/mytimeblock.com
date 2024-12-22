@@ -7,7 +7,7 @@ import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import timeblock from "../assets/timeblock.png";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { Context } from "../context/AuthContext";
 import { useContext } from "react";
 import { signOut } from "firebase/auth";
@@ -16,19 +16,20 @@ import { auth } from "../firebase/config";
 const Header = () => {
   const { mode, setMode } = useColorScheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(Context);
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      if (user) {
-        navigate("/dashboard");
-      } else {
-        navigate("/signup");
-      }
+      navigate("/signup");
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const isProtectedRoute = () => {
+    return ["/dashboard"].includes(location.pathname);
   };
 
   if (!mode) {
@@ -67,7 +68,7 @@ const Header = () => {
             checked={mode === "light"}
             onChange={() => setMode(mode === "light" ? "dark" : "light")}
           />
-          {user && (
+          {user && isProtectedRoute() && (
             <Button
               variant="text"
               color="inherit"
