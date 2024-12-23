@@ -7,6 +7,7 @@ import Login from "./routes/Login";
 import Dashboard from "./components/Dashboard";
 import Protected from "./routes/Protected";
 import AuthContext from "./context/AuthContext";
+import Reset from "./routes/Reset";
 
 function App() {
   const { mode } = useColorScheme();
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/reset" element={<Reset />} />
             <Route
               path="/dashboard"
               element={

@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase/config";
 import Header from "../components/Header";
+import { Link } from "react-router";
 
 interface SignUpFormData {
   email: string;
@@ -143,6 +144,16 @@ const SignUp = () => {
               >
                 Sign Up
               </Button>
+              <Box textAlign="center">
+                <Link
+                  to="/reset"
+                  style={{ textDecoration: "none", color: "primary.main" }}
+                >
+                  <Typography color="primary" variant="body2">
+                    Forgot Password?
+                  </Typography>
+                </Link>
+              </Box>
             </Box>
           </Paper>
         </Box>

@@ -124,9 +124,19 @@ const Login = () => {
               >
                 Sign In
               </Button>
-              <Box sx={{ textAlign: "center" }}>
+              <Box
+                sx={{
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 1,
+                }}
+              >
                 <Link component={RouterLink} to="/signup" variant="body2">
                   {"Don't have an account? Sign Up"}
+                </Link>
+                <Link component={RouterLink} to="/reset" variant="body2">
+                  Forgot Password?
                 </Link>
               </Box>
             </Box>
