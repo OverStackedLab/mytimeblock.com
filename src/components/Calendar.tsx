@@ -309,7 +309,6 @@ const BlockCalendar = () => {
             events={events}
             localizer={localizer}
             resizable
-            popup
             selectable={"ignoreEvents"}
             onSelectEvent={handleSelectEvent}
             onEventDrop={moveEvent}
@@ -317,9 +316,6 @@ const BlockCalendar = () => {
             onSelectSlot={handleSelectSlot}
             eventPropGetter={eventPropGetter}
             selected={selected}
-            allDayAccessor={(event: EventInfo) => {
-              return !!event.allDay;
-            }}
           />
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>

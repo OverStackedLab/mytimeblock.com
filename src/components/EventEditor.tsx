@@ -322,7 +322,7 @@ const EventEditor = forwardRef(
                   )}
                 />
               </Box>
-              <Stack direction="row" gap={2}>
+              <Stack direction="row" gap={2} pb={2}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -342,6 +342,22 @@ const EventEditor = forwardRef(
                   Delete
                 </Button>
               </Stack>
+              <Box>
+                <Typography
+                  display="inline"
+                  variant="subtitle1"
+                  fontWeight={500}
+                  pr={0.5}
+                >
+                  Duration:
+                </Typography>
+                <Typography display="inline" variant="body2">
+                  {`${dayjs(formContext.watch("eventEndTime")).diff(
+                    formContext.watch("eventStartTime"),
+                    "minutes"
+                  )} minutes`}
+                </Typography>
+              </Box>
             </Stack>
           </Box>
         </form>
