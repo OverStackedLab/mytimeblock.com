@@ -302,7 +302,7 @@ const BlockCalendar = () => {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box display="flex" gap={2} p={6}>
-        <Box flex={1} height={"70vh"}>
+        <Box flex={1} height={"80vh"}>
           <DragAndDropCalendar
             defaultView={Views.WEEK}
             views={views}
@@ -316,6 +316,7 @@ const BlockCalendar = () => {
             onSelectSlot={handleSelectSlot}
             eventPropGetter={eventPropGetter}
             selected={selected}
+            scrollToTime={dayjs().toDate()}
           />
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
