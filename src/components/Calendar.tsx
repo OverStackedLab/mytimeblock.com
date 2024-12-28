@@ -26,6 +26,8 @@ import { db } from "../firebase/config";
 import { doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { useContext } from "react";
 import { Context } from "../context/AuthContext";
+import { Timestamp } from "firebase/firestore";
+import { MenuItem, Menu, Typography } from "@mui/material";
 
 dayjs.extend(timezone);
 dayjs.extend(duration);
@@ -49,8 +51,6 @@ export type EventInfo = Event & {
   userId?: string;
 };
 
-import { Timestamp } from "firebase/firestore";
-
 const parseEvents = (events: EventInfo[]): EventInfo[] => {
   return events.map((event) => ({
     ...event,
@@ -73,6 +73,29 @@ const BlockCalendar = () => {
   const childRef = useRef<EditorHandle>(null);
   const { mode } = useColorScheme();
   const { user } = useContext(Context);
+  const [contextMenu, setContextMenu] = useState<{
+    mouseX: number;
+    mouseY: number;
+  } | null>(null);
+
+  const handleContextMenu = (
+    mouseEvent: React.MouseEvent,
+    event: EventInfo
+  ) => {
+    mouseEvent.preventDefault();
+    setSelected(event);
+    setContextMenu(
+      contextMenu === null
+        ? {
+            mouseX: mouseEvent.clientX + 2,
+            mouseY: mouseEvent.clientY - 6,
+          }
+        : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
+          // Other native context menus might behave different.
+          // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
+          null
+    );
+  };
 
   const [events, setEvents] = useState<EventInfo[] | []>([]);
 
@@ -107,15 +130,6 @@ const BlockCalendar = () => {
     fetchEvents();
   }, [user]);
 
-  // useEffect(() => {
-  //   // Save the user object to localStorage whenever it changes
-  //   if (adminEmail === user?.email) {
-  //     saveToFirestore(events);
-  //   } else {
-  //     localStorage.setItem("events", JSON.stringify(events || []));
-  //   }
-  // }, [events]);
-
   const toggleSidebar = (newOpen: boolean) => () => {
     setIsSidebarOpen(newOpen);
   };
@@ -124,6 +138,25 @@ const BlockCalendar = () => {
   const { views } = useMemo(
     () => ({
       views: [Views.MONTH, Views.WEEK, Views.DAY],
+    }),
+    []
+  );
+
+  const components = useMemo(
+    () => ({
+      event: ({ event }: { event: EventInfo }) => {
+        return (
+          <Box
+            onContextMenu={(mouseEvent) => handleContextMenu(mouseEvent, event)}
+            style={{ cursor: "context-menu" }}
+            height={"100%"}
+          >
+            <Typography variant="subtitle1" sx={{ lineHeight: 1 }}>
+              {event.title}
+            </Typography>
+          </Box>
+        );
+      },
     }),
     []
   );
@@ -295,6 +328,23 @@ const BlockCalendar = () => {
     }
   }, [events, saveEvents]);
 
+  const handleClose = () => {
+    setContextMenu(null);
+  };
+
+  const handleDuplicate = () => {
+    if (selected) {
+      const newEvent = {
+        ...selected,
+        id: generateId(),
+        start: dayjs(selected.start).add(1, "day").toDate(),
+        end: dayjs(selected.end).add(1, "day").toDate(),
+      };
+      setEvents((prev) => [...prev, newEvent]);
+    }
+    handleClose();
+  };
+
   if (!mode) {
     return <></>;
   }
@@ -317,7 +367,20 @@ const BlockCalendar = () => {
             eventPropGetter={eventPropGetter}
             selected={selected}
             scrollToTime={dayjs().toDate()}
+            components={components}
           />
+          <Menu
+            open={contextMenu !== null}
+            onClose={handleClose}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              contextMenu !== null
+                ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                : undefined
+            }
+          >
+            <MenuItem onClick={handleDuplicate}>Duplicate</MenuItem>
+          </Menu>
         </Box>
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
           <EventEditor
