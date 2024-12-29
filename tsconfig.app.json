@@ -24,7 +24,8 @@
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
   "include": ["src", "vite.config.ts", "App.js"]
 }

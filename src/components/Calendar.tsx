@@ -148,10 +148,9 @@ const BlockCalendar = () => {
         return (
           <Box
             onContextMenu={(mouseEvent) => handleContextMenu(mouseEvent, event)}
-            style={{ cursor: "context-menu" }}
-            height={"100%"}
+            style={{ position: "absolute", top: 0, left: 0, height: "100%" }}
           >
-            <Typography variant="subtitle1" sx={{ lineHeight: 1 }}>
+            <Typography variant="subtitle1" sx={{ lineHeight: 3.4 }}>
               {event.title}
             </Typography>
           </Box>
@@ -263,6 +262,7 @@ const BlockCalendar = () => {
   );
 
   const handleSelectEvent = useCallback((event: EventInfo) => {
+    console.log("🚀 ~ handleSelectEvent ~ event:", event);
     setIsSidebarOpen(true);
     childRef.current?.updateEvent(event);
     childRef.current?.focusField("eventTitle");
@@ -359,7 +359,7 @@ const BlockCalendar = () => {
             events={events}
             localizer={localizer}
             resizable
-            selectable={"ignoreEvents"}
+            selectable={true}
             onSelectEvent={handleSelectEvent}
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}

@@ -13,10 +13,9 @@ export default [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": 2,
+      "@typescript-eslint/no-unused-vars": 1,
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
-      "@typescript-eslint/no-unused-vars": 1,
-      "no-unused-vars": 1,
     },
   },
 ];
