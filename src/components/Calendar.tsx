@@ -148,7 +148,13 @@ const BlockCalendar = () => {
         return (
           <Box
             onContextMenu={(mouseEvent) => handleContextMenu(mouseEvent, event)}
-            style={{ position: "absolute", top: 0, left: 0, height: "100%" }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              height: "100%",
+              width: "100%",
+            }}
           >
             <Typography variant="subtitle1" sx={{ lineHeight: 3.4 }}>
               {event.title}
