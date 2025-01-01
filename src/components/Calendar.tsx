@@ -146,20 +146,27 @@ const BlockCalendar = () => {
     () => ({
       event: ({ event }: { event: EventInfo }) => {
         return (
-          <Box
+          <div
             onContextMenu={(mouseEvent) => handleContextMenu(mouseEvent, event)}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              height: "100%",
-              width: "100%",
-            }}
+            style={
+              !event.allDay
+                ? {
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    height: "100%",
+                    width: "100%",
+                  }
+                : {}
+            }
           >
-            <Typography variant="subtitle1" sx={{ lineHeight: 3.4 }}>
+            <Typography
+              variant="subtitle1"
+              sx={!event.allDay ? { lineHeight: 4 } : {}}
+            >
               {event.title}
             </Typography>
-          </Box>
+          </div>
         );
       },
     }),
@@ -268,7 +275,6 @@ const BlockCalendar = () => {
   );
 
   const handleSelectEvent = useCallback((event: EventInfo) => {
-    console.log("🚀 ~ handleSelectEvent ~ event:", event);
     setIsSidebarOpen(true);
     childRef.current?.updateEvent(event);
     childRef.current?.focusField("eventTitle");

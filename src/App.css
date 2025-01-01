@@ -24,6 +24,7 @@
             border: 1px solid #ffd180;
         }
     }
+
     .rbc-event.rbc-selected {
         background-color: #ff6d00;
         outline: 6px auto #ffd180;
