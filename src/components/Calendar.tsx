@@ -6,6 +6,7 @@ import {
   Calendar,
   Views,
   type Event,
+  View,
 } from "react-big-calendar";
 import withDragAndDrop, {
   EventInteractionArgs,
@@ -27,7 +28,9 @@ import { doc, getDoc, setDoc, collection } from "firebase/firestore";
 import { useContext } from "react";
 import { Context } from "../context/AuthContext";
 import { Timestamp } from "firebase/firestore";
-import { MenuItem, Menu, Typography } from "@mui/material";
+import { MenuItem, Menu, Typography, Divider } from "@mui/material";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import Pomodoro from "./Pomodoro";
 
 dayjs.extend(timezone);
 dayjs.extend(duration);
@@ -101,6 +104,7 @@ const BlockCalendar = () => {
 
   const [selected, setSelected] = useState<EventInfo | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<View>(Views.WEEK);
 
   const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
@@ -357,6 +361,10 @@ const BlockCalendar = () => {
     handleClose();
   };
 
+  const handleViewChange = (newView: View) => {
+    setCurrentView(newView);
+  };
+
   if (!mode) {
     return <></>;
   }
@@ -380,6 +388,7 @@ const BlockCalendar = () => {
             selected={selected}
             scrollToTime={dayjs().toDate()}
             components={components}
+            onView={handleViewChange}
           />
           <Menu
             open={contextMenu !== null}
@@ -394,6 +403,23 @@ const BlockCalendar = () => {
             <MenuItem onClick={handleDuplicate}>Duplicate</MenuItem>
           </Menu>
         </Box>
+        {currentView === Views.DAY && (
+          <Box
+            sx={{
+              width: 340,
+              borderRadius: 1,
+              borderWidth: 1,
+              borderColor: "#dddddd",
+              borderStyle: "solid",
+              p: 2,
+            }}
+            gap={2}
+          >
+            <DateCalendar />
+            <Divider />
+            <Pomodoro />
+          </Box>
+        )}
         <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
           <EventEditor
             ref={childRef}
