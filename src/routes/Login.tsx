@@ -133,7 +133,7 @@ const Login = () => {
                 }}
               >
                 <Link component={RouterLink} to="/signup" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                  {"Don't have an account? Sign Up For Free"}
                 </Link>
                 <Link component={RouterLink} to="/reset" variant="body2">
                   Forgot Password?

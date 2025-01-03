@@ -19,6 +19,8 @@ const Pomodoro = () => {
   const [timeLeft, setTimeLeft] = useState(focusMinutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [timerState, setTimerState] = useState<TimerState>("idle");
+  const [totalIntervals, setTotalIntervals] = useState(4);
+  const [currentInterval, setCurrentInterval] = useState(1);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -33,16 +35,30 @@ const Pomodoro = () => {
         setTimeLeft(breakMinutes * 60);
         setTimerState("break");
       } else if (timerState === "break") {
-        alert("Break time is over! Ready for another focus session?");
-        setTimeLeft(focusMinutes * 60);
-        setTimerState("focus");
+        if (currentInterval < totalIntervals) {
+          alert("Break time is over! Ready for another focus session?");
+          setTimeLeft(focusMinutes * 60);
+          setTimerState("focus");
+          setCurrentInterval((prev) => prev + 1);
+        } else {
+          alert("Congratulations! You've completed all intervals!");
+          resetTimer();
+        }
       }
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isActive, timeLeft, timerState, breakMinutes, focusMinutes]);
+  }, [
+    isActive,
+    timeLeft,
+    timerState,
+    breakMinutes,
+    focusMinutes,
+    currentInterval,
+    totalIntervals,
+  ]);
 
   const toggleTimer = () => {
     if (timerState === "idle") {
@@ -56,21 +72,39 @@ const Pomodoro = () => {
     setIsActive(false);
     setTimerState("idle");
     setTimeLeft(focusMinutes * 60);
+    setCurrentInterval(1);
   };
 
   const handleFocusMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(1, Math.min(60, Number(e.target.value)));
-    setFocusMinutes(value);
-    if (timerState === "focus" || timerState === "idle") {
-      setTimeLeft(value * 60);
+    if (e.target.value) {
+      const value = Math.max(1, Math.min(60, Number(e.target.value)));
+      setFocusMinutes(value);
+      if (timerState === "focus" || timerState === "idle") {
+        setTimeLeft(value * 60);
+      }
+    } else {
+      setFocusMinutes(0);
     }
   };
 
   const handleBreakMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(1, Math.min(30, Number(e.target.value)));
-    setBreakMinutes(value);
-    if (timerState === "break") {
-      setTimeLeft(value * 60);
+    if (e.target.value) {
+      const value = Math.max(1, Math.min(30, Number(e.target.value)));
+      setBreakMinutes(value);
+      if (timerState === "break") {
+        setTimeLeft(value * 60);
+      }
+    } else {
+      setBreakMinutes(0);
+    }
+  };
+
+  const handleIntervalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value) {
+      const value = Math.max(1, Math.min(10, Number(e.target.value)));
+      setTotalIntervals(value);
+    } else {
+      setTotalIntervals(0);
     }
   };
 
@@ -107,7 +141,7 @@ const Pomodoro = () => {
         <CircularProgress
           variant="determinate"
           value={100}
-          size={120}
+          size={180}
           thickness={4}
           sx={{
             color: "grey.200",
@@ -117,7 +151,7 @@ const Pomodoro = () => {
         <CircularProgress
           variant="determinate"
           value={100 - progress}
-          size={120}
+          size={180}
           thickness={4}
           sx={{
             color: timerState === "break" ? "success.main" : "primary.main",
@@ -153,20 +187,32 @@ const Pomodoro = () => {
           label="Focus"
           type="number"
           size="small"
-          value={focusMinutes}
+          value={focusMinutes || ""}
           onChange={handleFocusMinutesChange}
           disabled={isActive}
-          sx={{ width: 100 }}
+          sx={{ width: 80 }}
         />
         <TextField
-          label="Break"
+          label="Me Time"
           type="number"
           size="small"
-          value={breakMinutes}
+          value={breakMinutes || ""}
           onChange={handleBreakMinutesChange}
           disabled={isActive}
-          sx={{ width: 100 }}
+          sx={{ width: 80 }}
         />
+        <TextField
+          label="Intervals"
+          type="number"
+          size="small"
+          value={totalIntervals || ""}
+          onChange={handleIntervalsChange}
+          disabled={isActive}
+          sx={{ width: 80 }}
+        />
+        <Typography color="text.secondary" sx={{ alignSelf: "center" }}>
+          {currentInterval}/{totalIntervals}
+        </Typography>
       </Stack>
     </Box>
   );
