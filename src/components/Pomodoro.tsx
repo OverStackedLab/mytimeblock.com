@@ -10,17 +10,28 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import { useNotifications } from "@toolpad/core/useNotifications";
 
 type TimerState = "focus" | "break" | "idle";
 
 const Pomodoro = () => {
-  const [focusMinutes, setFocusMinutes] = useState(25);
-  const [breakMinutes, setBreakMinutes] = useState(5);
+  const notifications = useNotifications();
+  const [focusMinutes, setFocusMinutes] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_focusMinutes");
+    return saved ? Number(saved) : 25;
+  });
+  const [breakMinutes, setBreakMinutes] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_breakMinutes");
+    return saved ? Number(saved) : 5;
+  });
+  const [totalIntervals, setTotalIntervals] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_totalIntervals");
+    return saved ? Number(saved) : 4;
+  });
+  const [currentInterval, setCurrentInterval] = useState(1);
   const [timeLeft, setTimeLeft] = useState(focusMinutes * 60);
   const [isActive, setIsActive] = useState(false);
   const [timerState, setTimerState] = useState<TimerState>("idle");
-  const [totalIntervals, setTotalIntervals] = useState(4);
-  const [currentInterval, setCurrentInterval] = useState(1);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -31,24 +42,38 @@ const Pomodoro = () => {
       }, 1000);
     } else if (timeLeft === 0) {
       if (timerState === "focus") {
-        alert("Focus session complete! Time for a break.");
+        notifications.show("Focus session complete! Time for a break.", {
+          autoHideDuration: 8000,
+        });
         setTimeLeft(breakMinutes * 60);
         setTimerState("break");
       } else if (timerState === "break") {
         if (currentInterval < totalIntervals) {
-          alert("Break time is over! Ready for another focus session?");
+          notifications.show(
+            "Break time is over! Ready for another focus session?",
+            {
+              autoHideDuration: 8000,
+            }
+          );
           setTimeLeft(focusMinutes * 60);
           setTimerState("focus");
           setCurrentInterval((prev) => prev + 1);
         } else {
-          alert("Congratulations! You've completed all intervals!");
+          notifications.show(
+            "Congratulations! You've completed all intervals!",
+            {
+              autoHideDuration: 8000,
+            }
+          );
           resetTimer();
         }
       }
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
     };
   }, [
     isActive,
@@ -58,6 +83,7 @@ const Pomodoro = () => {
     focusMinutes,
     currentInterval,
     totalIntervals,
+    notifications,
   ]);
 
   const toggleTimer = () => {
@@ -133,8 +159,8 @@ const Pomodoro = () => {
         {timerState === "focus"
           ? "Focus"
           : timerState === "break"
-          ? "Me Time"
-          : "Un Pomodoro"}
+            ? "Me Time"
+            : "Un Pomodoro"}
       </Typography>
 
       <Box position="relative" display="inline-flex">
@@ -181,6 +207,9 @@ const Pomodoro = () => {
         <IconButton onClick={resetTimer} color="secondary" size="large">
           <RestartAltIcon />
         </IconButton>
+        <Typography color="text.secondary" sx={{ alignSelf: "center" }}>
+          {currentInterval}/{totalIntervals}
+        </Typography>
       </Stack>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <TextField
@@ -210,9 +239,6 @@ const Pomodoro = () => {
           disabled={isActive}
           sx={{ width: 80 }}
         />
-        <Typography color="text.secondary" sx={{ alignSelf: "center" }}>
-          {currentInterval}/{totalIntervals}
-        </Typography>
       </Stack>
     </Box>
   );
