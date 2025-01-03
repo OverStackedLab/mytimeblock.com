@@ -8,6 +8,7 @@ import Dashboard from "./components/Dashboard";
 import Protected from "./routes/Protected";
 import AuthContext from "./context/AuthContext";
 import Reset from "./routes/Reset";
+import Footer from "./components/Footer";
 
 function App() {
   const { mode } = useColorScheme();
@@ -19,7 +20,7 @@ function App() {
   return (
     <AuthContext>
       <BrowserRouter>
-        <Box className={mode}>
+        <Box className={mode} sx={{ pb: 7 }}>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
@@ -33,6 +34,7 @@ function App() {
               }
             />
           </Routes>
+          <Footer />
         </Box>
       </BrowserRouter>
     </AuthContext>
