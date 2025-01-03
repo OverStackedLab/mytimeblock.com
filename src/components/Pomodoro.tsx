@@ -26,7 +26,7 @@ const Pomodoro = () => {
   });
   const [totalIntervals, setTotalIntervals] = useState(() => {
     const saved = localStorage.getItem("pomodoro_totalIntervals");
-    return saved ? Number(saved) : 4;
+    return saved ? Number(saved) : 12;
   });
   const [currentInterval, setCurrentInterval] = useState(1);
   const [timeLeft, setTimeLeft] = useState(focusMinutes * 60);
@@ -127,7 +127,7 @@ const Pomodoro = () => {
 
   const handleIntervalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {
-      const value = Math.max(1, Math.min(10, Number(e.target.value)));
+      const value = Math.max(1, Math.min(36, Number(e.target.value)));
       setTotalIntervals(value);
     } else {
       setTotalIntervals(0);
