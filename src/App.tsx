@@ -9,7 +9,8 @@ import Protected from "./routes/Protected";
 import AuthContext from "./context/AuthContext";
 import Reset from "./routes/Reset";
 import Footer from "./components/Footer";
-import { NotificationsProvider } from "@toolpad/core/useNotifications";
+import CloseIcon from "@mui/icons-material/Close";
+import { SnackbarProvider, closeSnackbar } from "notistack";
 
 function App() {
   const { mode } = useColorScheme();
@@ -20,7 +21,11 @@ function App() {
 
   return (
     <AuthContext>
-      <NotificationsProvider>
+      <SnackbarProvider
+        action={(snackbarId) => (
+          <CloseIcon onClick={() => closeSnackbar(snackbarId)} />
+        )}
+      >
         <BrowserRouter>
           <Box className={mode} sx={{ pb: 7 }}>
             <Routes>
@@ -39,7 +44,7 @@ function App() {
             <Footer />
           </Box>
         </BrowserRouter>
-      </NotificationsProvider>
+      </SnackbarProvider>
     </AuthContext>
   );
 }

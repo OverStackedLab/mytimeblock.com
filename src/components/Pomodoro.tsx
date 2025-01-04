@@ -8,12 +8,12 @@ import TextField from "@mui/material/TextField";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import { useNotifications } from "@toolpad/core/useNotifications";
+import { useSnackbar } from "notistack";
 
 type TimerState = "focus" | "break" | "idle";
 
 const Pomodoro = () => {
-  const notifications = useNotifications();
+  const { enqueueSnackbar } = useSnackbar();
   const [focusMinutes, setFocusMinutes] = useState(() => {
     const saved = localStorage.getItem("pomodoro_focusMinutes");
     return saved ? Number(saved) : 25;
@@ -40,29 +40,26 @@ const Pomodoro = () => {
       }, 1000);
     } else if (timeLeft === 0) {
       if (timerState === "focus") {
-        notifications.show("Focus session complete! Time for a break.", {
+        enqueueSnackbar("Focus session complete! Time for some me time.", {
+          anchorOrigin: { vertical: "top", horizontal: "right" },
           autoHideDuration: 8000,
         });
         setTimeLeft(breakMinutes * 60);
         setTimerState("break");
       } else if (timerState === "break") {
         if (currentInterval < totalIntervals) {
-          notifications.show(
-            "Break time is over! Ready for another focus session?",
-            {
-              autoHideDuration: 8000,
-            }
-          );
+          enqueueSnackbar("Me time is over! Ready for another focus session?", {
+            anchorOrigin: { vertical: "top", horizontal: "right" },
+            autoHideDuration: 8000,
+          });
           setTimeLeft(focusMinutes * 60);
           setTimerState("focus");
           setCurrentInterval((prev) => prev + 1);
         } else {
-          notifications.show(
-            "Congratulations! You've completed all intervals!",
-            {
-              autoHideDuration: 8000,
-            }
-          );
+          enqueueSnackbar("Congratulations! You've completed all intervals!", {
+            anchorOrigin: { vertical: "top", horizontal: "right" },
+            autoHideDuration: 8000,
+          });
           resetTimer();
         }
       }
@@ -81,7 +78,7 @@ const Pomodoro = () => {
     focusMinutes,
     currentInterval,
     totalIntervals,
-    notifications,
+    enqueueSnackbar,
   ]);
 
   const toggleTimer = () => {
