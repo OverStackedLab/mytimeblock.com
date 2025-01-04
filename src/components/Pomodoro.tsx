@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Stack,
-  IconButton,
-  TextField,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
+import Stack from "@mui/material/Stack";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";

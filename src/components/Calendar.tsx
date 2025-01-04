@@ -1,6 +1,13 @@
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+} from "react";
 import {
   dayjsLocalizer,
   Calendar,
@@ -17,19 +24,25 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import duration from "dayjs/plugin/duration";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import EventEditor, { EditorHandle } from "./EventEditor";
+import Alert from "@mui/material/Alert";
+import Collapse from "@mui/material/Collapse";
 import Box from "@mui/material/Box";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import SideBar from "./SideBar";
 import { useColorScheme } from "@mui/material/styles";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { db } from "../firebase/config";
 import { doc, getDoc, setDoc, collection } from "firebase/firestore";
-import { useContext } from "react";
-import { Context } from "../context/AuthContext";
 import { Timestamp } from "firebase/firestore";
-import { MenuItem, Menu, Typography, Divider } from "@mui/material";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { Context } from "../context/AuthContext";
+import EventEditor, { EditorHandle } from "./EventEditor";
+import SideBar from "./SideBar";
 import Pomodoro from "./Pomodoro";
 
 dayjs.extend(timezone);
@@ -80,6 +93,7 @@ const BlockCalendar = () => {
     mouseX: number;
     mouseY: number;
   } | null>(null);
+  const [alertOpen, setAlertOpen] = useState(true);
 
   const handleContextMenu = (
     mouseEvent: React.MouseEvent,
@@ -371,6 +385,27 @@ const BlockCalendar = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Box px={6}>
+        <Collapse in={alertOpen}>
+          <Alert
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setAlertOpen(false);
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Double click or drag on a time slot to start creating events!
+          </Alert>
+        </Collapse>
+      </Box>
       <Box display="flex" gap={2} p={6}>
         <Box flex={1} height={"80vh"}>
           <DragAndDropCalendar
