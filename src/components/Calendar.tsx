@@ -180,7 +180,7 @@ const BlockCalendar = () => {
           >
             <Typography
               variant="subtitle1"
-              sx={!event.allDay ? { lineHeight: 4 } : {}}
+              sx={!event.allDay ? { lineHeight: 3.3 } : {}}
             >
               {event.title}
             </Typography>
