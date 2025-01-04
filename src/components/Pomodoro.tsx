@@ -16,27 +16,65 @@ const Pomodoro = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [focusMinutes, setFocusMinutes] = useState(() => {
     const saved = localStorage.getItem("pomodoro_focusMinutes");
+    console.log(
+      "🚀 ~ const[focusMinutes,setFocusMinutes]=useState ~ saved:",
+      saved
+    );
     return saved ? Number(saved) : 25;
   });
+
   const [breakMinutes, setBreakMinutes] = useState(() => {
     const saved = localStorage.getItem("pomodoro_breakMinutes");
     return saved ? Number(saved) : 5;
   });
+
   const [totalIntervals, setTotalIntervals] = useState(() => {
     const saved = localStorage.getItem("pomodoro_totalIntervals");
     return saved ? Number(saved) : 12;
   });
-  const [currentInterval, setCurrentInterval] = useState(1);
-  const [timeLeft, setTimeLeft] = useState(focusMinutes * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [timerState, setTimerState] = useState<TimerState>("idle");
+
+  const [currentInterval, setCurrentInterval] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_state");
+    if (saved) {
+      const state = JSON.parse(saved);
+      return state.currentInterval;
+    }
+    return 1;
+  });
+
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_state");
+    if (saved) {
+      const state = JSON.parse(saved);
+      return state.timeLeft;
+    }
+    return focusMinutes * 60;
+  });
+
+  const [isActive, setIsActive] = useState(() => {
+    const saved = localStorage.getItem("pomodoro_state");
+    if (saved) {
+      const state = JSON.parse(saved);
+      return state.isActive;
+    }
+    return false;
+  });
+
+  const [timerState, setTimerState] = useState<TimerState>(() => {
+    const saved = localStorage.getItem("pomodoro_state");
+    if (saved) {
+      const state = JSON.parse(saved);
+      return state.timerState;
+    }
+    return "idle";
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 
     if (isActive && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((time) => time - 1);
+        setTimeLeft((time: number) => time - 1);
       }, 1000);
     } else if (timeLeft === 0) {
       if (timerState === "focus") {
@@ -54,7 +92,7 @@ const Pomodoro = () => {
           });
           setTimeLeft(focusMinutes * 60);
           setTimerState("focus");
-          setCurrentInterval((prev) => prev + 1);
+          setCurrentInterval((prev: number) => prev + 1);
         } else {
           enqueueSnackbar("Congratulations! You've completed all intervals!", {
             anchorOrigin: { vertical: "top", horizontal: "right" },
@@ -80,6 +118,41 @@ const Pomodoro = () => {
     totalIntervals,
     enqueueSnackbar,
   ]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "pomodoro_state",
+      JSON.stringify({
+        timeLeft,
+        isActive,
+        timerState,
+        currentInterval,
+        focusMinutes,
+        breakMinutes,
+        totalIntervals,
+      })
+    );
+  }, [
+    timeLeft,
+    isActive,
+    timerState,
+    currentInterval,
+    focusMinutes,
+    breakMinutes,
+    totalIntervals,
+  ]);
+
+  useEffect(() => {
+    localStorage.setItem("pomodoro_focusMinutes", focusMinutes.toString());
+  }, [focusMinutes]);
+
+  useEffect(() => {
+    localStorage.setItem("pomodoro_breakMinutes", breakMinutes.toString());
+  }, [breakMinutes]);
+
+  useEffect(() => {
+    localStorage.setItem("pomodoro_totalIntervals", totalIntervals.toString());
+  }, [totalIntervals]);
 
   const toggleTimer = () => {
     if (timerState === "idle") {
