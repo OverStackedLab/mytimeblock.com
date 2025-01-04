@@ -167,7 +167,7 @@ const BlockCalendar = () => {
           <div
             onContextMenu={(mouseEvent) => handleContextMenu(mouseEvent, event)}
             style={
-              !event.allDay
+              !event.allDay && currentView !== Views.MONTH
                 ? {
                     position: "absolute",
                     top: 0,
@@ -180,7 +180,11 @@ const BlockCalendar = () => {
           >
             <Typography
               variant="subtitle1"
-              sx={!event.allDay ? { lineHeight: 3.3 } : {}}
+              sx={
+                !event.allDay && currentView !== Views.MONTH
+                  ? { lineHeight: 3.3 }
+                  : {}
+              }
             >
               {event.title}
             </Typography>
@@ -188,7 +192,7 @@ const BlockCalendar = () => {
         );
       },
     }),
-    []
+    [currentView]
   );
 
   const moveEvent = useCallback(
@@ -375,9 +379,12 @@ const BlockCalendar = () => {
     handleClose();
   };
 
-  const handleViewChange = (newView: View) => {
-    setCurrentView(newView);
-  };
+  const handleViewChange = useCallback(
+    (newView: View) => {
+      setCurrentView(newView);
+    },
+    [setCurrentView]
+  );
 
   if (!mode) {
     return <></>;
@@ -424,6 +431,7 @@ const BlockCalendar = () => {
             scrollToTime={dayjs().toDate()}
             components={components}
             onView={handleViewChange}
+            view={currentView}
           />
           <Menu
             open={contextMenu !== null}
