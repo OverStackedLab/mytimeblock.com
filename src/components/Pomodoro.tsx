@@ -76,24 +76,24 @@ const Pomodoro = () => {
     } else if (timeLeft === 0) {
       if (timerState === "focus") {
         enqueueSnackbar("Focus session complete! Time for some me time.", {
-          anchorOrigin: { vertical: "top", horizontal: "right" },
-          autoHideDuration: 10 * 1000,
+          anchorOrigin: { vertical: "top", horizontal: "left" },
+          autoHideDuration: 10 * 1000, // 10 seconds
         });
         setTimeLeft(breakMinutes * 60);
         setTimerState("break");
       } else if (timerState === "break") {
         if (currentInterval < totalIntervals) {
           enqueueSnackbar("Me time is over! Ready for another focus session?", {
-            anchorOrigin: { vertical: "top", horizontal: "right" },
-            autoHideDuration: 10 * 1000,
+            anchorOrigin: { vertical: "top", horizontal: "left" },
+            autoHideDuration: 10 * 1000, // 10 seconds
           });
           setTimeLeft(focusMinutes * 60);
           setTimerState("focus");
           setCurrentInterval((prev: number) => prev + 1);
         } else {
           enqueueSnackbar("Congratulations! You've completed all intervals!", {
-            anchorOrigin: { vertical: "top", horizontal: "right" },
-            autoHideDuration: 10 * 1000,
+            anchorOrigin: { vertical: "top", horizontal: "left" },
+            autoHideDuration: 10 * 1000, // 10 seconds
           });
           resetTimer();
         }
