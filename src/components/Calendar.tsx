@@ -371,8 +371,8 @@ const BlockCalendar = () => {
       const newEvent = {
         ...selected,
         id: generateId(),
-        start: dayjs(selected.start).add(1, "day").toDate(),
-        end: dayjs(selected.end).add(1, "day").toDate(),
+        start: dayjs(selected.start).add(1, "hour").toDate(),
+        end: dayjs(selected.end).add(1, "hour").toDate(),
       };
       setEvents((prev) => [...prev, newEvent]);
     }

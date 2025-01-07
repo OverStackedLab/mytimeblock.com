@@ -16,10 +16,7 @@ const Pomodoro = () => {
   const { enqueueSnackbar } = useSnackbar();
   const [focusMinutes, setFocusMinutes] = useState(() => {
     const saved = localStorage.getItem("pomodoro_focusMinutes");
-    console.log(
-      "🚀 ~ const[focusMinutes,setFocusMinutes]=useState ~ saved:",
-      saved
-    );
+
     return saved ? Number(saved) : 25;
   });
 
@@ -80,7 +77,7 @@ const Pomodoro = () => {
       if (timerState === "focus") {
         enqueueSnackbar("Focus session complete! Time for some me time.", {
           anchorOrigin: { vertical: "top", horizontal: "right" },
-          autoHideDuration: 8000,
+          autoHideDuration: 10 * 1000,
         });
         setTimeLeft(breakMinutes * 60);
         setTimerState("break");
@@ -88,7 +85,7 @@ const Pomodoro = () => {
         if (currentInterval < totalIntervals) {
           enqueueSnackbar("Me time is over! Ready for another focus session?", {
             anchorOrigin: { vertical: "top", horizontal: "right" },
-            autoHideDuration: 8000,
+            autoHideDuration: 10 * 1000,
           });
           setTimeLeft(focusMinutes * 60);
           setTimerState("focus");
@@ -96,7 +93,7 @@ const Pomodoro = () => {
         } else {
           enqueueSnackbar("Congratulations! You've completed all intervals!", {
             anchorOrigin: { vertical: "top", horizontal: "right" },
-            autoHideDuration: 8000,
+            autoHideDuration: 10 * 1000,
           });
           resetTimer();
         }
