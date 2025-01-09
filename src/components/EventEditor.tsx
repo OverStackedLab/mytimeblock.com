@@ -352,10 +352,23 @@ const EventEditor = forwardRef(
                   Duration:
                 </Typography>
                 <Typography display="inline" variant="body2">
-                  {`${dayjs(formContext.watch("eventEndTime")).diff(
-                    formContext.watch("eventStartTime"),
-                    "minutes"
-                  )} minutes`}
+                  {(() => {
+                    const diffMinutes = dayjs(
+                      formContext.watch("eventEndTime")
+                    ).diff(formContext.watch("eventStartTime"), "minutes");
+                    const diffHours = Math.floor(diffMinutes / 60);
+                    const remainingMinutes = diffMinutes % 60;
+
+                    if (diffMinutes < 60) {
+                      return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
+                    }
+
+                    return `${diffHours} hour${diffHours === 1 ? "" : "s"}${
+                      remainingMinutes
+                        ? ` ${remainingMinutes} minute${remainingMinutes === 1 ? "" : "s"}`
+                        : ""
+                    }`;
+                  })()}
                 </Typography>
               </Box>
             </Stack>
