@@ -178,16 +178,15 @@ const BlockCalendar = () => {
                 : {}
             }
           >
-            <Typography
-              variant="subtitle1"
+            <Box
               sx={
                 !event.allDay && currentView !== Views.MONTH
-                  ? { lineHeight: 3.3 }
+                  ? { paddingTop: 1.7 }
                   : {}
               }
             >
-              {event.title}
-            </Typography>
+              <Typography variant="subtitle1">{event.title}</Typography>
+            </Box>
           </div>
         );
       },
