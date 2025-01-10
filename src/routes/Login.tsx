@@ -8,12 +8,15 @@ import {
   Alert,
   Paper,
   Link,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/config";
 import Header from "../components/Header";
 import { useColorScheme } from "@mui/material/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 type LoginFormData = {
   email: string;
@@ -29,6 +32,7 @@ const Login = () => {
   });
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,6 +64,10 @@ const Login = () => {
         setError("An error occurred during login");
       }
     }
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   return (
@@ -110,11 +118,26 @@ const Login = () => {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleTogglePassword}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
               <Button
                 type="submit"

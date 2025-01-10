@@ -7,6 +7,8 @@ import {
   Container,
   Alert,
   Paper,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import {
   createUserWithEmailAndPassword,
@@ -15,6 +17,7 @@ import {
 import { auth } from "../firebase/config";
 import Header from "../components/Header";
 import { Link } from "react-router";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 interface SignUpFormData {
   email: string;
@@ -30,6 +33,9 @@ const SignUp = () => {
   });
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,6 +76,15 @@ const SignUp = () => {
       }
     }
   };
+
+  const handleTogglePassword =
+    (field: "password" | "confirmPassword") => () => {
+      if (field === "password") {
+        setShowPassword((prev) => !prev);
+      } else {
+        setShowConfirmPassword((prev) => !prev);
+      }
+    };
 
   return (
     <Box>
@@ -119,11 +134,26 @@ const SignUp = () => {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 id="password"
                 autoComplete="new-password"
                 value={formData.password}
                 onChange={handleChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleTogglePassword("password")}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
               <TextField
                 margin="normal"
@@ -131,10 +161,29 @@ const SignUp = () => {
                 fullWidth
                 name="confirmPassword"
                 label="Confirm Password"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 id="confirm-password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle confirm password visibility"
+                          onClick={handleTogglePassword("confirmPassword")}
+                          edge="end"
+                        >
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
               />
               <Button
                 type="submit"
