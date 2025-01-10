@@ -59,7 +59,7 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       if (error instanceof Error) {
-        setError(error.message);
+        setError("Please check your credentials");
       } else {
         setError("An error occurred during login");
       }
