@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Radio, RadioGroup, Box, Popover, ButtonBase } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -54,13 +54,22 @@ const miscColors = [
   lime[500],
 ];
 
+const STORAGE_KEY = "colorPicker.availableColors";
+
 const ColorPicker = ({
   value,
   onChange,
   colors = defaultColors,
 }: ColorPickerProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [availableColors, setAvailableColors] = useState<string[]>(colors);
+  const [availableColors, setAvailableColors] = useState<string[]>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : colors;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(availableColors));
+  }, [availableColors]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     console.log("🚀 ~ handleClick ~ event:", event);
