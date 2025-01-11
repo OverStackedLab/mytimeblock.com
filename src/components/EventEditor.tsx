@@ -13,7 +13,7 @@ import type { EventInfo } from "./Calendar";
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 export type EditorHandle = {
-  focusField: (field: string) => void;
+  focusField: (field: "eventTitle" | "eventDescription") => void;
   updateEvent: (event: EventInfo) => void;
 };
 
