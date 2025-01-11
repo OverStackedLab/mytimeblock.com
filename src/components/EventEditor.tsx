@@ -21,7 +21,7 @@ export type EditorHandle = {
   updateEvent: (event: EventInfo) => void;
 };
 
-type FormValues = {
+export type FormValues = {
   eventId: string;
   eventTitle: string;
   eventDescription: string;

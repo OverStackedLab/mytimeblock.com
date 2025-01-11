@@ -84,7 +84,12 @@ const ColorPicker = ({
   };
 
   const handleAddColor = (color: string) => {
-    setAvailableColors((prev) => [...prev, color]);
+    setAvailableColors((prev) => {
+      if (prev.includes(color)) {
+        return prev;
+      }
+      return [...prev, color];
+    });
     handleClose();
   };
 
