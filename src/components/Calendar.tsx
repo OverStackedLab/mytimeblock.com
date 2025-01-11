@@ -298,7 +298,7 @@ const BlockCalendar = () => {
   const handleSelectEvent = useCallback((event: EventInfo) => {
     setIsSidebarOpen(true);
     childRef.current?.updateEvent(event);
-    childRef.current?.focusField("eventTitle");
+    // childRef.current?.focusField("eventTitle");
     setSelected(event);
   }, []);
 

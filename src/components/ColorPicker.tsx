@@ -24,11 +24,14 @@ import {
   teal,
   yellow,
 } from "@mui/material/colors";
+import { Controller, Control } from "react-hook-form";
+import { FormValues } from "./EventEditor";
 
 type ColorPickerProps = {
-  value: string;
-  onChange: (color: string) => void;
+  value?: string;
+  onChange?: (color: string) => void;
   colors?: string[];
+  control?: Control<FormValues>;
 };
 
 const defaultColors = [
@@ -57,9 +60,10 @@ const miscColors = [
 const STORAGE_KEY = "colorPicker.availableColors";
 
 const ColorPicker = ({
-  value,
-  onChange,
+  value = orange[700],
+  onChange = () => {},
   colors = defaultColors,
+  control,
 }: ColorPickerProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [availableColors, setAvailableColors] = useState<string[]>(() => {
@@ -72,7 +76,6 @@ const ColorPicker = ({
   }, [availableColors]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    console.log("🚀 ~ handleClick ~ event:", event);
     setAnchorEl(event.currentTarget);
   };
 
@@ -82,7 +85,6 @@ const ColorPicker = ({
 
   const handleAddColor = (color: string) => {
     setAvailableColors((prev) => [...prev, color]);
-    onChange(color);
     handleClose();
   };
 
@@ -90,64 +92,79 @@ const ColorPicker = ({
   const id = open ? "color-popover" : undefined;
 
   return (
-    <Box>
-      <RadioGroup
-        row
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        sx={{
-          flex: 1,
-        }}
-      >
-        {availableColors.map((color) => (
-          <Radio
-            key={color}
-            value={color}
-            icon={<CircleIcon sx={{ color: color }} />}
-            checkedIcon={<CheckCircleIcon sx={{ color: color }} />}
-          />
-        ))}
-        <ButtonBase onClick={handleClick}>
-          <AddCircleOutlineIcon sx={{ fontSize: 28, margin: 1 }} />
-        </ButtonBase>
-      </RadioGroup>
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "left",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-      >
-        <Box p={2} maxWidth={260}>
-          <RadioGroup
-            row
-            value={value}
-            onChange={(e) => handleAddColor(e.target.value)}
-          >
-            {miscColors.map((color, index) => (
-              <Radio
-                key={index}
-                value={color}
-                sx={{
-                  padding: 0.25,
-                }}
-                icon={<SquareRoundedIcon sx={{ color: color, fontSize: 32 }} />}
-                checkedIcon={
-                  <CheckBoxRoundedIcon sx={{ color: color, fontSize: 32 }} />
-                }
-              />
-            ))}
-          </RadioGroup>
-        </Box>
-      </Popover>
-    </Box>
+    <Controller
+      name="eventColor"
+      control={control}
+      render={({ field }) => {
+        return (
+          <Box>
+            <RadioGroup
+              {...field}
+              row
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              sx={{
+                flex: 1,
+              }}
+            >
+              {availableColors.map((color, index) => (
+                <Radio
+                  key={index}
+                  value={color}
+                  icon={<CircleIcon sx={{ color: color }} />}
+                  checkedIcon={<CheckCircleIcon sx={{ color: color }} />}
+                />
+              ))}
+              <ButtonBase onClick={handleClick}>
+                <AddCircleOutlineIcon sx={{ fontSize: 28, margin: 1 }} />
+              </ButtonBase>
+            </RadioGroup>
+            <Popover
+              id={id}
+              open={open}
+              anchorEl={anchorEl}
+              onClose={handleClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "left",
+              }}
+            >
+              <Box p={2} maxWidth={260}>
+                <RadioGroup
+                  row
+                  value={value}
+                  onChange={(e) => handleAddColor(e.target.value)}
+                >
+                  {miscColors.map((color, index) => (
+                    <Radio
+                      key={index}
+                      value={color}
+                      sx={{
+                        padding: 0.25,
+                      }}
+                      icon={
+                        <SquareRoundedIcon
+                          sx={{ color: color, fontSize: 32 }}
+                        />
+                      }
+                      checkedIcon={
+                        <CheckBoxRoundedIcon
+                          sx={{ color: color, fontSize: 32 }}
+                        />
+                      }
+                    />
+                  ))}
+                </RadioGroup>
+              </Box>
+            </Popover>
+          </Box>
+        );
+      }}
+    />
   );
 };
 
