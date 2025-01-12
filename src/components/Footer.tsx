@@ -20,6 +20,7 @@ const Footer = () => {
         display: "grid",
         gridTemplateColumns: "200px 1fr 200px",
         alignItems: "center",
+        zIndex: 100,
       }}
     >
       <Box /> {/* Left spacer */}
