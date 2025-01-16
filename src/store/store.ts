@@ -15,7 +15,7 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import calendarSlice from "./services/calendarSlice";
+import calendarSlice from "../services/calendarSlice";
 
 const persistConfig = {
   key: "root",

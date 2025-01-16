@@ -1,10 +1,19 @@
-export type EventInfo = Event & {
-  id?: string;
-  description?: string;
-  color?: string;
-  userId?: string;
-  start?: Date;
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: Date;
   end?: Date;
+  description?: string;
+  backgroundColor?: string;
   allDay?: boolean;
-  title?: string;
+  userId?: string;
+  color?: string;
+};
+
+export type EventState = {
+  events: CalendarEvent[];
+};
+
+export type RootState = {
+  events: EventState;
 };

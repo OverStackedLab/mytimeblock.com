@@ -12,7 +12,7 @@ import Footer from "./components/Footer";
 import CloseIcon from "@mui/icons-material/Close";
 import { SnackbarProvider, closeSnackbar } from "notistack";
 import { Provider } from "react-redux";
-import { persistor, store } from "./store";
+import { persistor, store } from "./store/store";
 import { PersistGate } from "redux-persist/integration/react";
 
 function App() {

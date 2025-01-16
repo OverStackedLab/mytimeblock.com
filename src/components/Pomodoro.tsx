@@ -105,6 +105,7 @@ const Pomodoro = () => {
         clearInterval(interval);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     isActive,
     timeLeft,
@@ -224,8 +225,8 @@ const Pomodoro = () => {
         {timerState === "focus"
           ? "Focus"
           : timerState === "break"
-            ? "Me Time"
-            : "Un Pomodoro"}
+          ? "Me Time"
+          : "Un Pomodoro"}
       </Typography>
 
       <Box position="relative" display="inline-flex">

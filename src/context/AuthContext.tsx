@@ -33,7 +33,7 @@ const AuthContext = ({ children }: AuthContextProps) => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, []);
+  }, [auth]);
 
   const values: AuthContextType = {
     user,

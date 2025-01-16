@@ -2,19 +2,32 @@ import { useState, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, {
+  EventResizeDoneArg,
+} from "@fullcalendar/interaction";
 import { generateId } from "../utils/createEventId";
-import { DateSelectArg, EventAddArg, EventClickArg } from "@fullcalendar/core";
+import {
+  DateSelectArg,
+  EventAddArg,
+  EventClickArg,
+  EventDropArg,
+} from "@fullcalendar/core";
 import { Alert, IconButton, Box, Collapse } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
-import { events, setEvents } from "../services/calendarSlice";
+import {
+  addEvent,
+  deleteEvent,
+  events,
+  setEvents,
+  updateEvent,
+} from "../services/calendarSlice";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import SideBar from "./SideBar";
 import EventEditor, { EditorHandle } from "./EventEditor";
-import { EventInfo } from "../@types/Events";
+import { CalendarEvent } from "../@types/Events";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -31,6 +44,9 @@ const Calendar = () => {
   const [alertOpen, setAlertOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const childRef = useRef<EditorHandle>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
 
   const handleContextMenu = (event: React.MouseEvent) => {
     setContextMenu(
@@ -68,29 +84,50 @@ const Calendar = () => {
   };
 
   const handleEventAdd = (arg: EventAddArg) => {
-    dispatch(setEvents([arg.event.toPlainObject()]));
+    const event = arg.event.toPlainObject();
+    dispatch(addEvent({ ...event, description: "", color: "", userId: "" }));
+  };
+
+  const handleEventDrop = (info: EventDropArg) => {
+    const updatedEvent = {
+      ...info.event.toPlainObject(),
+      id: info.event.id,
+      start: info.event.start,
+      end: info.event.end,
+    } as CalendarEvent;
+    dispatch(updateEvent(updatedEvent));
+  };
+
+  const handleEventResize = (info: EventResizeDoneArg) => {
+    const updatedEvent = {
+      ...info.event.toPlainObject(),
+      id: info.event.id,
+      start: info.event.start,
+      end: info.event.end,
+    } as CalendarEvent;
+    dispatch(updateEvent(updatedEvent));
   };
 
   const toggleSidebar = (open: boolean) => () => {
     setIsSidebarOpen(open);
   };
 
-  const setEvent = (event: EventInfo) => {
+  const setEvent = (event: CalendarEvent) => {
     dispatch(setEvents([...calendarEvents, event]));
     toggleSidebar(false)();
   };
 
   const handleDeleteEvent = (eventId: string) => {
-    const updatedEvents = calendarEvents.filter(
-      (event) => event.id !== eventId
-    );
-    dispatch(setEvents(updatedEvents));
-    toggleSidebar(false)();
+    if (eventId) {
+      dispatch(deleteEvent(eventId));
+    }
   };
 
-  const handleEventClick = (event: EventClickArg) => {
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const event = clickInfo.event.toPlainObject() as CalendarEvent;
+    setSelectedEvent(event);
     childRef.current?.updateEvent(event);
-    toggleSidebar(true)();
+    toggleSidebar(true);
   };
 
   return (
@@ -129,9 +166,12 @@ const Calendar = () => {
           selectable={true}
           selectMirror={true}
           dayMaxEvents={true}
+          nowIndicator={true}
           events={calendarEvents}
           eventAdd={handleEventAdd}
           eventClick={handleEventClick}
+          eventDrop={handleEventDrop}
+          eventResize={handleEventResize}
           eventDidMount={(info) => {
             info.el.addEventListener(
               "contextmenu",
@@ -141,6 +181,8 @@ const Calendar = () => {
                   clientX: event.clientX,
                   clientY: event.clientY,
                 } as React.MouseEvent);
+                setSelectedEvent(info.event.toPlainObject() as CalendarEvent);
+
                 return false;
               },
               false
@@ -159,7 +201,16 @@ const Calendar = () => {
           }
         >
           <MenuItem onClick={handleClose}>Duplicate</MenuItem>
-          <MenuItem onClick={handleClose}>Delete</MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (selectedEvent?.id) {
+                handleDeleteEvent(selectedEvent.id);
+                handleClose();
+              }
+            }}
+          >
+            Delete
+          </MenuItem>
         </Menu>
       </Box>
       <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>

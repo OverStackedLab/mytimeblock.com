@@ -1,7 +1,6 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { useForm, Controller } from "react-hook-form";
-import type { EventInfo } from "./Calendar";
 import { useTheme } from "@mui/system";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -13,12 +12,13 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { orange } from "@mui/material/colors";
 import ColorPicker from "./ColorPicker";
+import { CalendarEvent } from "@/@types/Events";
 
 const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 export type EditorHandle = {
   focusField: (field: string) => void;
-  updateEvent: (event: EventInfo) => void;
+  updateEvent: (event: CalendarEvent) => void;
 };
 
 export type FormValues = {
@@ -34,7 +34,7 @@ export type FormValues = {
 };
 
 type EventEditorProps = {
-  setEvent: (event: EventInfo) => void;
+  setEvent: (event: CalendarEvent) => void;
   deleteEvent: (eventId: string) => void;
   closeEditor: () => void;
 };
@@ -64,7 +64,7 @@ const EventEditor = forwardRef(
       focusField: (field: "eventTitle" | "eventDescription") => {
         formContext.setFocus(field, { shouldSelect: true });
       },
-      updateEvent: (event: EventInfo) => {
+      updateEvent: (event: CalendarEvent) => {
         formContext.setValue("eventTitle", (event?.title as string) || "");
         formContext.setValue("eventDate", dayjs(event.start));
         formContext.setValue("eventStartTime", dayjs(event.start));
@@ -281,12 +281,16 @@ const EventEditor = forwardRef(
                     const remainingMinutes = diffMinutes % 60;
 
                     if (diffMinutes < 60) {
-                      return `${diffMinutes} minute${diffMinutes === 1 ? "" : "s"}`;
+                      return `${diffMinutes} minute${
+                        diffMinutes === 1 ? "" : "s"
+                      }`;
                     }
 
                     return `${diffHours} hour${diffHours === 1 ? "" : "s"}${
                       remainingMinutes
-                        ? ` ${remainingMinutes} minute${remainingMinutes === 1 ? "" : "s"}`
+                        ? ` ${remainingMinutes} minute${
+                            remainingMinutes === 1 ? "" : "s"
+                          }`
                         : ""
                     }`;
                   })()}
