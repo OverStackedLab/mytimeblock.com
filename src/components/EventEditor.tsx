@@ -35,7 +35,7 @@ export type FormValues = {
 
 type EventEditorProps = {
   setEvent: (event: CalendarEvent) => void;
-  deleteEvent: (eventId: string) => void;
+  deleteEvent: (event: CalendarEvent) => void;
   closeEditor: () => void;
 };
 
@@ -70,7 +70,10 @@ const EventEditor = forwardRef(
         formContext.setValue("eventStartTime", dayjs(event.start));
         formContext.setValue("eventEndTime", dayjs(event.end));
         formContext.setValue("eventId", event?.id || generateId());
-        formContext.setValue("eventDescription", event?.description || "");
+        formContext.setValue(
+          "eventDescription",
+          event?.extendedProps?.description || ""
+        );
         formContext.setValue("eventColor", event?.color || orange[700]);
         if (event?.allDay) {
           formContext.setValue("eventStartDate", dayjs(event.start));
@@ -110,9 +113,12 @@ const EventEditor = forwardRef(
         start: eventStartTime.toDate(),
         end: eventEndTime.toDate(),
         title: values.eventTitle,
-        description: values.eventDescription,
+        extendedProps: {
+          description: values.eventDescription,
+        },
         color: color,
       });
+      closeEditor();
     };
 
     return (
@@ -258,7 +264,7 @@ const EventEditor = forwardRef(
                   color="primary"
                   fullWidth
                   disableElevation
-                  onClick={() => deleteEvent(formContext.getValues("eventId"))}
+                  onClick={() => {}}
                 >
                   Delete
                 </Button>

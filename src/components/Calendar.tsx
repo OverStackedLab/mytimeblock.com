@@ -31,6 +31,7 @@ import { CalendarEvent } from "../@types/Events";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Context } from "../context/AuthContext";
+import dayjs from "dayjs";
 
 type ContextMenuType = {
   mouseX: number;
@@ -75,7 +76,7 @@ const Calendar = () => {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    const title = prompt("Please enter a new title for your event");
+    const title = "New block";
     const calendarApi = selectInfo.view.calendar;
 
     calendarApi.unselect(); // clear date selection
@@ -106,6 +107,43 @@ const Calendar = () => {
     dispatch(addEventToFirebase({ event: newEvent, userId: user.uid }));
   };
 
+  const handleDeleteEvent = (event: CalendarEvent) => {
+    console.log("🚀 ~ handleDeleteEvent ~ event:", event);
+    if (!user) {
+      return;
+    }
+    dispatch(
+      deleteEventFromFirebase({
+        event: event,
+        userId: user.uid,
+      })
+    );
+  };
+
+  const handleEventUpdate = (event: CalendarEvent) => {
+    if (!user) {
+      return;
+    }
+
+    dispatch(
+      updateEventInFirebase({
+        event: {
+          ...event,
+          start: dayjs(event.start).format("YYYY-MM-DDTHH:mm:ssZ"),
+          end: dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ"),
+        },
+        userId: user.uid,
+      })
+    );
+  };
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    const event = clickInfo.event.toPlainObject() as CalendarEvent;
+    setSelectedEvent(event);
+    childRef.current?.updateEvent(event);
+    setIsSidebarOpen(true);
+  };
+
   const handleEventDrop = (info: EventDropArg) => {
     if (!user) {
       return;
@@ -113,7 +151,7 @@ const Calendar = () => {
     const updatedEvent = {
       ...info.event.toPlainObject(),
       extendedProps: {
-        description: "",
+        description: info.event.extendedProps.description || "",
       },
     } as CalendarEvent;
     dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
@@ -126,33 +164,10 @@ const Calendar = () => {
     const updatedEvent = {
       ...info.event.toPlainObject(),
       extendedProps: {
-        description: "",
+        description: info.event.extendedProps.description || "",
       },
     } as CalendarEvent;
     dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
-  };
-
-  const toggleSidebar = (open: boolean) => () => {
-    setIsSidebarOpen(open);
-  };
-
-  const handleDeleteEvent = (event: CalendarEvent) => {
-    if (!user) {
-      return;
-    }
-    dispatch(
-      deleteEventFromFirebase({
-        event: event,
-        userId: user.uid,
-      })
-    );
-  };
-
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const event = clickInfo.event.toPlainObject() as CalendarEvent;
-    setSelectedEvent(event);
-    childRef.current?.updateEvent(event);
-    toggleSidebar(true);
   };
 
   return (
@@ -214,6 +229,9 @@ const Calendar = () => {
             );
           }}
           select={handleDateSelect}
+          eventChange={function (info) {
+            console.log("🚀 ~ FullCalendar ~ info:", info);
+          }}
         />
         <Menu
           open={contextMenu !== null}
@@ -238,11 +256,11 @@ const Calendar = () => {
           </MenuItem>
         </Menu>
       </Box>
-      <SideBar open={isSidebarOpen} onClose={toggleSidebar(false)}>
+      <SideBar open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)}>
         <EventEditor
           ref={childRef}
-          closeEditor={toggleSidebar(false)}
-          setEvent={() => {}}
+          closeEditor={() => setIsSidebarOpen(false)}
+          setEvent={handleEventUpdate}
           deleteEvent={handleDeleteEvent}
         />
       </SideBar>
