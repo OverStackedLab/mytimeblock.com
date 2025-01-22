@@ -34,7 +34,7 @@ export type FormValues = {
 };
 
 type EventEditorProps = {
-  setEvent: (event: CalendarEvent) => void;
+  updateEvent: (event: CalendarEvent) => void;
   deleteEvent: (event: CalendarEvent) => void;
   closeEditor: () => void;
 };
@@ -42,9 +42,10 @@ type EventEditorProps = {
 const today = dayjs();
 
 const EventEditor = forwardRef(
-  ({ setEvent, deleteEvent, closeEditor }: EventEditorProps, ref) => {
+  ({ updateEvent, deleteEvent, closeEditor }: EventEditorProps, ref) => {
     const theme = useTheme();
     const [allDay, setAllDay] = useState(false);
+    const [event, setEvent] = useState<CalendarEvent | null>(null);
 
     const formContext = useForm<FormValues>({
       defaultValues: {
@@ -65,6 +66,7 @@ const EventEditor = forwardRef(
         formContext.setFocus(field, { shouldSelect: true });
       },
       updateEvent: (event: CalendarEvent) => {
+        setEvent(event);
         formContext.setValue("eventTitle", (event?.title as string) || "");
         formContext.setValue("eventDate", dayjs(event.start));
         formContext.setValue("eventStartTime", dayjs(event.start));
@@ -108,7 +110,7 @@ const EventEditor = forwardRef(
           .set("date", eventDate.date());
       }
 
-      setEvent({
+      updateEvent({
         id: values.eventId,
         start: eventStartTime.toDate(),
         end: eventEndTime.toDate(),
@@ -264,7 +266,12 @@ const EventEditor = forwardRef(
                   color="primary"
                   fullWidth
                   disableElevation
-                  onClick={() => {}}
+                  onClick={() => {
+                    if (event) {
+                      deleteEvent(event);
+                      closeEditor();
+                    }
+                  }}
                 >
                   Delete
                 </Button>
