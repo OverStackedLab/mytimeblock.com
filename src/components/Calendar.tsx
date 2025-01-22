@@ -260,7 +260,7 @@ const Calendar = () => {
         <EventEditor
           ref={childRef}
           closeEditor={() => setIsSidebarOpen(false)}
-          setEvent={handleEventUpdate}
+          updateEvent={handleEventUpdate}
           deleteEvent={handleDeleteEvent}
         />
       </SideBar>
