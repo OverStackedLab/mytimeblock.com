@@ -3,11 +3,18 @@ export type CalendarEvent = {
   title: string;
   start: Date;
   end?: Date;
-  description?: string;
   backgroundColor?: string;
   allDay?: boolean;
-  userId?: string;
   color?: string;
+  extendedProps?: {
+    description?: string;
+  };
+};
+
+export type CalendarState = {
+  events: CalendarEvent[];
+  loading: boolean;
+  error: string | null;
 };
 
 export type EventState = {

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -16,11 +16,11 @@ import { Alert, IconButton, Box, Collapse } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
 import {
-  addEvent,
-  deleteEvent,
-  events,
-  setEvents,
-  updateEvent,
+  addEventToFirebase,
+  updateEventInFirebase,
+  deleteEventFromFirebase,
+  fetchEvents,
+  calendar,
 } from "../services/calendarSlice";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import Menu from "@mui/material/Menu";
@@ -30,6 +30,7 @@ import EventEditor, { EditorHandle } from "./EventEditor";
 import { CalendarEvent } from "../@types/Events";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Context } from "../context/AuthContext";
 
 type ContextMenuType = {
   mouseX: number;
@@ -37,16 +38,23 @@ type ContextMenuType = {
 } | null;
 
 const Calendar = () => {
-  const calendarEvents = useAppSelector(events);
+  const { events } = useAppSelector(calendar);
   const dispatch = useAppDispatch();
-
   const [contextMenu, setContextMenu] = useState<ContextMenuType>(null);
+  const { user } = useContext(Context);
   const [alertOpen, setAlertOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const childRef = useRef<EditorHandle>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
+
+  useEffect(() => {
+    if (user?.uid) {
+      dispatch(fetchEvents(user?.uid || ""));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.uid]);
 
   const handleContextMenu = (event: React.MouseEvent) => {
     setContextMenu(
@@ -84,43 +92,60 @@ const Calendar = () => {
   };
 
   const handleEventAdd = (arg: EventAddArg) => {
-    const event = arg.event.toPlainObject();
-    dispatch(addEvent({ ...event, description: "", color: "", userId: "" }));
+    if (!user) {
+      return;
+    }
+    const newEvent = {
+      ...arg.event.toPlainObject(),
+      color: "",
+      extendedProps: {
+        description: "",
+      },
+    } as CalendarEvent;
+
+    dispatch(addEventToFirebase({ event: newEvent, userId: user.uid }));
   };
 
   const handleEventDrop = (info: EventDropArg) => {
+    if (!user) {
+      return;
+    }
     const updatedEvent = {
       ...info.event.toPlainObject(),
-      id: info.event.id,
-      start: info.event.start,
-      end: info.event.end,
+      extendedProps: {
+        description: "",
+      },
     } as CalendarEvent;
-    dispatch(updateEvent(updatedEvent));
+    dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
   };
 
   const handleEventResize = (info: EventResizeDoneArg) => {
+    if (!user) {
+      return;
+    }
     const updatedEvent = {
       ...info.event.toPlainObject(),
-      id: info.event.id,
-      start: info.event.start,
-      end: info.event.end,
+      extendedProps: {
+        description: "",
+      },
     } as CalendarEvent;
-    dispatch(updateEvent(updatedEvent));
+    dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
   };
 
   const toggleSidebar = (open: boolean) => () => {
     setIsSidebarOpen(open);
   };
 
-  const setEvent = (event: CalendarEvent) => {
-    dispatch(setEvents([...calendarEvents, event]));
-    toggleSidebar(false)();
-  };
-
-  const handleDeleteEvent = (eventId: string) => {
-    if (eventId) {
-      dispatch(deleteEvent(eventId));
+  const handleDeleteEvent = (event: CalendarEvent) => {
+    if (!user) {
+      return;
     }
+    dispatch(
+      deleteEventFromFirebase({
+        event: event,
+        userId: user.uid,
+      })
+    );
   };
 
   const handleEventClick = (clickInfo: EventClickArg) => {
@@ -132,7 +157,7 @@ const Calendar = () => {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box px={6}>
+      <Box px={4} py={1}>
         <Collapse in={alertOpen}>
           <Alert
             action={
@@ -153,7 +178,7 @@ const Calendar = () => {
           </Alert>
         </Collapse>
       </Box>
-      <Box height={1010} marginBottom={30} p={4}>
+      <Box height={1010} marginBottom={30} px={4}>
         <FullCalendar
           headerToolbar={{
             left: "prev,next,today",
@@ -167,7 +192,7 @@ const Calendar = () => {
           selectMirror={true}
           dayMaxEvents={true}
           nowIndicator={true}
-          events={calendarEvents}
+          events={events}
           eventAdd={handleEventAdd}
           eventClick={handleEventClick}
           eventDrop={handleEventDrop}
@@ -203,8 +228,8 @@ const Calendar = () => {
           <MenuItem onClick={handleClose}>Duplicate</MenuItem>
           <MenuItem
             onClick={() => {
-              if (selectedEvent?.id) {
-                handleDeleteEvent(selectedEvent.id);
+              if (selectedEvent) {
+                handleDeleteEvent(selectedEvent);
                 handleClose();
               }
             }}
@@ -217,7 +242,7 @@ const Calendar = () => {
         <EventEditor
           ref={childRef}
           closeEditor={toggleSidebar(false)}
-          setEvent={setEvent}
+          setEvent={() => {}}
           deleteEvent={handleDeleteEvent}
         />
       </SideBar>
