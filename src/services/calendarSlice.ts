@@ -2,35 +2,81 @@ import { CalendarEvent, CalendarState, EventInfo } from "../@types/Events";
 import { RootState } from "../store/store";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { db } from "../firebase/config";
-import { doc, getDoc, setDoc, arrayUnion, updateDoc } from "firebase/firestore";
-import dayjs from "dayjs";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  arrayUnion,
+  updateDoc,
+  Timestamp,
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
-// const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
 export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
-  return oldEvents.map((event) => ({
-    id: String(event.id || ""),
-    title: String(event.title || ""),
-    start: String(dayjs(event.start).format("YYYY-MM-DDTHH:mm:ssZ") || ""),
-    end: String(dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ") || ""),
-    backgroundColor: String(event.color || ""),
-    allDay: Boolean(event.allDay),
-    extendedProps: {
-      description: String(event.description || ""),
-    },
-  }));
+  return oldEvents.map((event) => {
+    let startDate: string;
+    let endDate: string;
+
+    if (event?.start instanceof Timestamp) {
+      startDate = event.start.toDate().toISOString();
+    } else {
+      startDate = String(event.start || new Date().toISOString());
+    }
+
+    if (event?.end instanceof Timestamp) {
+      endDate = event.end.toDate().toISOString();
+    } else {
+      endDate = String(event.end || startDate);
+    }
+
+    return {
+      id: String(event.id || ""),
+      title: String(event.title || ""),
+      start: startDate,
+      end: endDate,
+      backgroundColor: String(event.color || ""),
+      allDay: Boolean(event.allDay),
+      extendedProps: {
+        description: String(event.description || ""),
+      },
+    };
+  });
 };
 
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
   async (userId: string) => {
-    const docRef = doc(db, "events", userId);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data().events || [];
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error("User not found");
     }
-    // If the document doesn't exist, create it with an empty events array
-    await setDoc(docRef, { events: [] }, { merge: true });
+
+    if (adminEmail === user.email && user.emailVerified === true) {
+      const docRef = doc(db, "events", userId);
+      const docSnap = await getDoc(docRef);
+
+      const userEventsRef = doc(db, "userEvents", userId);
+      const userEventsSnap = await getDoc(userEventsRef);
+
+      if (userEventsSnap.exists() && !docSnap.exists()) {
+        const migratedEvents = migrateEvents(
+          userEventsSnap.data().events || []
+        );
+
+        await setDoc(docRef, { events: migratedEvents }, { merge: true });
+        return migratedEvents;
+      }
+
+      if (docSnap.exists()) {
+        return docSnap.data().events || [];
+      }
+      // If the document doesn't exist, create it with an empty events array
+      await setDoc(docRef, { events: [] }, { merge: true });
+    }
     return [];
   }
 );
@@ -122,6 +168,11 @@ const calendarSlice = createSlice({
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
+        // Clear any existing error state
+        state.error = null;
+        // Parse and merge events from localStorage with fetched events
+        // This allows for migration of any locally stored events when
+        // the user first authenticates
         const localStorageEvents = localStorage.getItem("events");
         if (localStorageEvents) {
           const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));

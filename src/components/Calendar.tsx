@@ -12,7 +12,7 @@ import {
   EventClickArg,
   EventDropArg,
 } from "@fullcalendar/core";
-import { Alert, IconButton, Box, Collapse } from "@mui/material";
+import { Alert, IconButton, Box, Collapse, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
 import {
@@ -33,6 +33,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Context } from "../context/AuthContext";
 import dayjs from "dayjs";
 import { orange } from "@mui/material/colors";
+import Pomodoro from "./Pomodoro";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 
 type ContextMenuType = {
   mouseX: number;
@@ -196,65 +198,73 @@ const Calendar = () => {
           </Alert>
         </Collapse>
       </Box>
-      <Box height={1010} marginBottom={30} px={4}>
-        <FullCalendar
-          headerToolbar={{
-            left: "today,prev,next",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
-          editable={true}
-          selectable={true}
-          selectMirror={true}
-          dayMaxEvents={true}
-          nowIndicator={true}
-          events={events}
-          eventAdd={handleEventAdd}
-          eventClick={handleEventClick}
-          eventDrop={handleEventDrop}
-          eventResize={handleEventResize}
-          eventDidMount={(info) => {
-            info.el.addEventListener(
-              "contextmenu",
-              (event) => {
-                event.preventDefault();
-                handleContextMenu({
-                  clientX: event.clientX,
-                  clientY: event.clientY,
-                } as React.MouseEvent);
-                setSelectedEvent(info.event.toPlainObject() as CalendarEvent);
-
-                return false;
-              },
-              false
-            );
-          }}
-          select={handleDateSelect}
-        />
-        <Menu
-          open={contextMenu !== null}
-          onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            contextMenu !== null
-              ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-              : undefined
-          }
-        >
-          <MenuItem onClick={handleClose}>Duplicate</MenuItem>
-          <MenuItem
-            onClick={() => {
-              if (selectedEvent) {
-                handleDeleteEvent(selectedEvent);
-                handleClose();
-              }
+      <Box display="flex">
+        <Box mb={4} px={4} width="100%">
+          <FullCalendar
+            headerToolbar={{
+              left: "today,prev,next",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
+            height={1030}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="timeGridWeek"
+            editable={true}
+            selectable={true}
+            selectMirror={true}
+            dayMaxEvents={true}
+            nowIndicator={true}
+            events={events}
+            eventAdd={handleEventAdd}
+            eventClick={handleEventClick}
+            eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
+            eventDidMount={(info) => {
+              info.el.addEventListener(
+                "contextmenu",
+                (event) => {
+                  event.preventDefault();
+                  handleContextMenu({
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                  } as React.MouseEvent);
+                  setSelectedEvent(info.event.toPlainObject() as CalendarEvent);
+
+                  return false;
+                },
+                false
+              );
+            }}
+            select={handleDateSelect}
+          />
+          <Menu
+            open={contextMenu !== null}
+            onClose={handleClose}
+            anchorReference="anchorPosition"
+            anchorPosition={
+              contextMenu !== null
+                ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+                : undefined
+            }
           >
-            Delete
-          </MenuItem>
-        </Menu>
+            <MenuItem onClick={handleClose}>Duplicate</MenuItem>
+            <MenuItem
+              onClick={() => {
+                if (selectedEvent) {
+                  handleDeleteEvent(selectedEvent);
+                  handleClose();
+                }
+              }}
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+        </Box>
+        <Box pr={4} height={1030}>
+          <DateCalendar />
+          <Divider />
+          <Pomodoro />
+        </Box>
       </Box>
       <SideBar open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)}>
         <EventEditor

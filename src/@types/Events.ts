@@ -31,4 +31,6 @@ export type EventInfo = Event & {
   description?: string;
   color?: string;
   userId?: string;
+  start?: Date | string;
+  end?: Date | string;
 };
