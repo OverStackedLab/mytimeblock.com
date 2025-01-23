@@ -1,10 +1,25 @@
-import { CalendarEvent, CalendarState } from "../@types/Events";
+import { CalendarEvent, CalendarState, EventInfo } from "../@types/Events";
 import { RootState } from "../store/store";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { db } from "../firebase/config";
 import { doc, getDoc, setDoc, arrayUnion, updateDoc } from "firebase/firestore";
+import dayjs from "dayjs";
 
 // const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+
+export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
+  return oldEvents.map((event) => ({
+    id: String(event.id || ""),
+    title: String(event.title || ""),
+    start: String(dayjs(event.start).format("YYYY-MM-DDTHH:mm:ssZ") || ""),
+    end: String(dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ") || ""),
+    backgroundColor: String(event.color || ""),
+    allDay: Boolean(event.allDay),
+    extendedProps: {
+      description: String(event.description || ""),
+    },
+  }));
+};
 
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
@@ -107,7 +122,13 @@ const calendarSlice = createSlice({
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
-        state.events = action.payload;
+        const localStorageEvents = localStorage.getItem("events");
+        if (localStorageEvents) {
+          const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
+          state.events = [...migratedEvents, ...action.payload];
+        } else {
+          state.events = action.payload;
+        }
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;

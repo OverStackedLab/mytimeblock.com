@@ -1,3 +1,5 @@
+import { Event } from "react-big-calendar";
+
 export type CalendarEvent = {
   id: string;
   title: string;
@@ -5,7 +7,6 @@ export type CalendarEvent = {
   end?: Date | string;
   backgroundColor?: string;
   allDay?: boolean;
-  color?: string;
   extendedProps?: {
     description?: string;
   };
@@ -23,4 +24,11 @@ export type EventState = {
 
 export type RootState = {
   events: EventState;
+};
+
+export type EventInfo = Event & {
+  id?: string;
+  description?: string;
+  color?: string;
+  userId?: string;
 };

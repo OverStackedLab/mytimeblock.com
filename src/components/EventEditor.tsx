@@ -18,7 +18,7 @@ const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
 
 export type EditorHandle = {
   focusField: (field: string) => void;
-  updateEvent: (event: CalendarEvent) => void;
+  setEventFormValues: (event: CalendarEvent) => void;
 };
 
 export type FormValues = {
@@ -65,7 +65,7 @@ const EventEditor = forwardRef(
       focusField: (field: "eventTitle" | "eventDescription") => {
         formContext.setFocus(field, { shouldSelect: true });
       },
-      updateEvent: (event: CalendarEvent) => {
+      setEventFormValues: (event: CalendarEvent) => {
         setEvent(event);
         formContext.setValue("eventTitle", (event?.title as string) || "");
         formContext.setValue("eventDate", dayjs(event.start));
@@ -76,12 +76,15 @@ const EventEditor = forwardRef(
           "eventDescription",
           event?.extendedProps?.description || ""
         );
-        formContext.setValue("eventColor", event?.color || orange[700]);
+        formContext.setValue(
+          "eventColor",
+          event?.backgroundColor || orange[700]
+        );
         if (event?.allDay) {
           formContext.setValue("eventStartDate", dayjs(event.start));
           formContext.setValue("eventEndDate", dayjs(event.end));
         }
-        setColor(event?.color || orange[700]);
+        setColor(event?.backgroundColor || orange[700]);
         setAllDay(event?.allDay || false);
       },
     }));
@@ -98,6 +101,7 @@ const EventEditor = forwardRef(
         values.eventDate,
         "day"
       );
+
       if (!isSameDate) {
         // Ensure eventEndTime matches the same date as eventDate
         eventStartTime = eventStartTime
@@ -118,7 +122,7 @@ const EventEditor = forwardRef(
         extendedProps: {
           description: values.eventDescription,
         },
-        color: color,
+        backgroundColor: color,
       });
       closeEditor();
     };

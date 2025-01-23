@@ -32,6 +32,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Context } from "../context/AuthContext";
 import dayjs from "dayjs";
+import { orange } from "@mui/material/colors";
 
 type ContextMenuType = {
   mouseX: number;
@@ -88,6 +89,10 @@ const Calendar = () => {
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         allDay: selectInfo.allDay,
+        backgroundColor: orange[700],
+        extendedProps: {
+          description: "",
+        },
       });
     }
   };
@@ -98,17 +103,15 @@ const Calendar = () => {
     }
     const newEvent = {
       ...arg.event.toPlainObject(),
-      color: "",
+      backgroundColor: orange[700],
       extendedProps: {
         description: "",
       },
     } as CalendarEvent;
-
     dispatch(addEventToFirebase({ event: newEvent, userId: user.uid }));
   };
 
   const handleDeleteEvent = (event: CalendarEvent) => {
-    console.log("🚀 ~ handleDeleteEvent ~ event:", event);
     if (!user) {
       return;
     }
@@ -140,7 +143,7 @@ const Calendar = () => {
   const handleEventClick = (clickInfo: EventClickArg) => {
     const event = clickInfo.event.toPlainObject() as CalendarEvent;
     setSelectedEvent(event);
-    childRef.current?.updateEvent(event);
+    childRef.current?.setEventFormValues(event);
     setIsSidebarOpen(true);
   };
 
@@ -189,14 +192,14 @@ const Calendar = () => {
             }
             sx={{ mb: 2 }}
           >
-            Double click or drag on a time slot to start creating events!
+            Click or drag on a time slot to start creating events!
           </Alert>
         </Collapse>
       </Box>
       <Box height={1010} marginBottom={30} px={4}>
         <FullCalendar
           headerToolbar={{
-            left: "prev,next,today",
+            left: "today,prev,next",
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
@@ -229,9 +232,6 @@ const Calendar = () => {
             );
           }}
           select={handleDateSelect}
-          eventChange={function (info) {
-            console.log("🚀 ~ FullCalendar ~ info:", info);
-          }}
         />
         <Menu
           open={contextMenu !== null}
