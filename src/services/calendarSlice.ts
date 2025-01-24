@@ -174,7 +174,7 @@ const calendarSlice = createSlice({
         // This allows for migration of any locally stored events when
         // the user first authenticates
         const localStorageEvents = localStorage.getItem("events");
-        if (localStorageEvents) {
+        if (localStorageEvents && state.events.length === 0) {
           const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
           state.events = [...migratedEvents, ...action.payload];
         } else {

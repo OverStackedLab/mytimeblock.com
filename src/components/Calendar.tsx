@@ -12,7 +12,15 @@ import {
   EventClickArg,
   EventDropArg,
 } from "@fullcalendar/core";
-import { Alert, IconButton, Box, Collapse, Divider } from "@mui/material";
+import {
+  Alert,
+  IconButton,
+  Box,
+  Collapse,
+  Divider,
+  Typography,
+  Avatar,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
 import {
@@ -35,6 +43,7 @@ import dayjs from "dayjs";
 import { orange } from "@mui/material/colors";
 import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { getAuth } from "firebase/auth";
 
 type ContextMenuType = {
   mouseX: number;
@@ -52,6 +61,7 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
+  const auth = getAuth();
 
   useEffect(() => {
     if (user?.uid) {
@@ -207,6 +217,19 @@ const Calendar = () => {
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
             height={1030}
+            buttonIcons={false}
+            buttonText={{
+              today: "Today",
+              month: "Month",
+              week: "Week",
+              day: "Day",
+            }}
+            customButtons={{
+              today: {
+                text: "Today",
+              },
+            }}
+            buttonClassNames="no-shadow"
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
             editable={true}
@@ -261,6 +284,14 @@ const Calendar = () => {
           </Menu>
         </Box>
         <Box pr={4} height={1030}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Avatar sx={{ bgcolor: "primary.main" }}>
+              {auth.currentUser?.email?.[0].toUpperCase() || "?"}
+            </Avatar>
+            <Typography>
+              {auth.currentUser?.email || "Not signed in"}
+            </Typography>
+          </Box>
           <DateCalendar />
           <Divider />
           <Pomodoro />
