@@ -15,13 +15,34 @@ import { Provider } from "react-redux";
 import { persistor, store } from "./store/store";
 import { PersistGate } from "redux-persist/integration/react";
 
-function App() {
+function AppContent() {
   const { mode } = useColorScheme();
 
   if (!mode) {
     return <></>;
   }
 
+  return (
+    <Box className={mode} sx={{ pb: 7 }}>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/reset" element={<Reset />} />
+        <Route
+          path="/dashboard"
+          element={
+            <Protected>
+              <Dashboard />
+            </Protected>
+          }
+        />
+      </Routes>
+      <Footer />
+    </Box>
+  );
+}
+
+function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -32,22 +53,7 @@ function App() {
             )}
           >
             <BrowserRouter>
-              <Box className={mode} sx={{ pb: 7 }}>
-                <Routes>
-                  <Route path="/" element={<Login />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/reset" element={<Reset />} />
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <Protected>
-                        <Dashboard />
-                      </Protected>
-                    }
-                  />
-                </Routes>
-                <Footer />
-              </Box>
+              <AppContent />
             </BrowserRouter>
           </SnackbarProvider>
         </AuthContext>

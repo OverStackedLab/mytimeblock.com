@@ -16,6 +16,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import calendarSlice from "../services/calendarSlice";
+import authReducer from "../services/authSlice";
 
 const persistConfig = {
   key: "root",
@@ -25,6 +26,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   calendar: calendarSlice,
+  auth: authReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

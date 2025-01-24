@@ -1,5 +1,7 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import { useAppDispatch } from "../hooks/useAppDispatch";
+import { initializeAuth } from "../services/authSlice";
 
 type AuthContextType = {
   user: User | null;
@@ -19,6 +21,7 @@ const AuthContext = ({ children }: AuthContextProps) => {
   const auth = getAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,10 +33,12 @@ const AuthContext = ({ children }: AuthContextProps) => {
       }
     });
 
+    dispatch(initializeAuth());
+
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [auth]);
+  }, [auth, dispatch]);
 
   const values: AuthContextType = {
     user,

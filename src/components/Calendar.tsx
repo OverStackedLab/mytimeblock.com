@@ -217,19 +217,6 @@ const Calendar = () => {
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
             height={1030}
-            buttonIcons={false}
-            buttonText={{
-              today: "Today",
-              month: "Month",
-              week: "Week",
-              day: "Day",
-            }}
-            customButtons={{
-              today: {
-                text: "Today",
-              },
-            }}
-            buttonClassNames="no-shadow"
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
             editable={true}
