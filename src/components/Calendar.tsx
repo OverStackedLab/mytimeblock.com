@@ -87,7 +87,6 @@ const Calendar = () => {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    console.log("🚀 ~ handleDateSelect ~ selectInfo:", selectInfo);
     const title = "New block";
     const calendarApi = selectInfo.view.calendar;
 
@@ -109,14 +108,17 @@ const Calendar = () => {
   };
 
   const handleEventAdd = (arg: EventAddArg) => {
-    console.log("🚀 ~ handleEventAdd ~ arg:", arg.event.toPlainObject());
     if (!user) {
       return;
     }
     const newEvent = {
       ...arg.event.toPlainObject(),
+      backgroundColor: orange[700],
+      extendedProps: {
+        description: "",
+      },
     } as CalendarEvent;
-    dispatch(addEventToFirebase({ event: newEvent, userId: user.uid }));
+    dispatch(addEventToFirebase({ event: newEvent, userId: user?.uid || "" }));
   };
 
   const handleDeleteEvent = (event: CalendarEvent) => {
@@ -126,7 +128,7 @@ const Calendar = () => {
     dispatch(
       deleteEventFromFirebase({
         event: event,
-        userId: user.uid,
+        userId: user?.uid || "",
       })
     );
   };
@@ -143,7 +145,7 @@ const Calendar = () => {
           start: dayjs(event.start).format("YYYY-MM-DDTHH:mm:ssZ"),
           end: dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ"),
         },
-        userId: user.uid,
+        userId: user?.uid || "",
       })
     );
   };
@@ -165,7 +167,12 @@ const Calendar = () => {
         description: info.event.extendedProps.description || "",
       },
     } as CalendarEvent;
-    dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
+    dispatch(
+      updateEventInFirebase({
+        event: updatedEvent,
+        userId: user?.uid || "",
+      })
+    );
   };
 
   const handleEventResize = (info: EventResizeDoneArg) => {
@@ -178,7 +185,12 @@ const Calendar = () => {
         description: info.event.extendedProps.description || "",
       },
     } as CalendarEvent;
-    dispatch(updateEventInFirebase({ event: updatedEvent, userId: user.uid }));
+    dispatch(
+      updateEventInFirebase({
+        event: updatedEvent,
+        userId: user?.uid || "",
+      })
+    );
   };
 
   return (

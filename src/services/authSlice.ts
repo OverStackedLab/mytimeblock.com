@@ -1,21 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  signOut,
-  UserMetadata,
-} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { RootState } from "../store/store";
 
 interface AuthState {
   user: {
     email: string | null | undefined;
-    uid: string | undefined;
+    uid: string;
     displayName: string | null | undefined;
     photoURL: string | null | undefined;
     emailVerified: boolean | undefined;
     isAnonymous: boolean | undefined;
-    metadata: UserMetadata | undefined;
   } | null;
   loading: boolean;
   error: string | null;
@@ -61,7 +55,6 @@ export const initializeAuth = createAsyncThunk("auth/initialize", async () => {
     photoURL: user?.photoURL,
     emailVerified: user?.emailVerified,
     isAnonymous: user?.isAnonymous,
-    metadata: user?.metadata,
   };
 });
 
@@ -79,7 +72,14 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        state.user = {
+          email: action.payload.email,
+          uid: action.payload.uid || "",
+          displayName: action.payload.displayName,
+          photoURL: action.payload.photoURL,
+          emailVerified: action.payload.emailVerified,
+          isAnonymous: action.payload.isAnonymous,
+        };
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -89,7 +89,14 @@ const authSlice = createSlice({
         state.user = null;
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
-        state.user = action.payload;
+        state.user = {
+          email: action.payload.email,
+          uid: action.payload.uid,
+          displayName: action.payload.displayName,
+          photoURL: action.payload.photoURL,
+          emailVerified: action.payload.emailVerified,
+          isAnonymous: action.payload.isAnonymous,
+        };
       });
   },
 });

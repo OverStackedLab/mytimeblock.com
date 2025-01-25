@@ -14,6 +14,9 @@ import { getAuth } from "firebase/auth";
 
 const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
+const auth = getAuth();
+const user = auth.currentUser;
+
 export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
   return oldEvents.map((event) => {
     let startDate: string;
@@ -48,35 +51,26 @@ export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
   async (userId: string) => {
-    const auth = getAuth();
-    const user = auth.currentUser;
-
     if (!user) {
       throw new Error("User not found");
     }
 
-    if (adminEmail === user.email && user.emailVerified === true) {
-      const docRef = doc(db, "events", userId);
-      const docSnap = await getDoc(docRef);
-
-      const userEventsRef = doc(db, "userEvents", userId);
-      const userEventsSnap = await getDoc(userEventsRef);
-
-      if (userEventsSnap.exists() && !docSnap.exists()) {
-        const migratedEvents = migrateEvents(
-          userEventsSnap.data().events || []
-        );
-
-        await setDoc(docRef, { events: migratedEvents }, { merge: true });
-        return migratedEvents;
-      }
-
-      if (docSnap.exists()) {
-        return docSnap.data().events || [];
-      }
-      // If the document doesn't exist, create it with an empty events array
-      await setDoc(docRef, { events: [] }, { merge: true });
+    if (user?.email && user.email !== adminEmail) {
+      return [];
     }
+
+    // Only fetch events if user is admin
+
+    const docRef = doc(db, "events", userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data().events || [];
+    }
+
+    // Initialize empty events array for new users
+    await setDoc(docRef, { events: [] }, { merge: true });
+
     return [];
   }
 );
@@ -93,6 +87,9 @@ export const setEvents = createAsyncThunk(
 export const addEventToFirebase = createAsyncThunk(
   "events/addEventToFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    if (!user?.email || user.email !== adminEmail) {
+      return event;
+    }
     try {
       const docRef = doc(db, "events", userId);
       await updateDoc(docRef, {
@@ -109,6 +106,10 @@ export const addEventToFirebase = createAsyncThunk(
 export const updateEventInFirebase = createAsyncThunk(
   "events/updateEventInFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    if (!user?.email || user.email !== adminEmail) {
+      return event;
+    }
+
     const docRef = doc(db, "events", userId);
     const docSnap = await getDoc(docRef);
 
@@ -132,6 +133,9 @@ export const updateEventInFirebase = createAsyncThunk(
 export const deleteEventFromFirebase = createAsyncThunk(
   "events/deleteEventFromFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    if (!user?.email || user.email !== adminEmail) {
+      return event;
+    }
     const docRef = doc(db, "events", userId);
     const docSnap = await getDoc(docRef);
 
@@ -175,14 +179,13 @@ const calendarSlice = createSlice({
         // Parse and merge events from localStorage with fetched events
         // This allows for migration of any locally stored events when
         // the user first authenticates
-        // const localStorageEvents = localStorage.getItem("events");
-        // if (localStorageEvents && state.events.length === 0) {
-        //   const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
-        //   state.events = [...migratedEvents, ...action.payload];
-        // } else {
-        //   state.events = action.payload;
-        // }
-        state.events = action.payload;
+        const localStorageEvents = localStorage.getItem("events");
+        if (localStorageEvents && state.events.length === 0) {
+          const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
+          state.events = [...migratedEvents, ...action.payload];
+        } else {
+          state.events = [...state.events, ...action.payload];
+        }
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
