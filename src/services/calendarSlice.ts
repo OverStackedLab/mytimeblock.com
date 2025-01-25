@@ -160,7 +160,9 @@ const initialState: CalendarState = {
 const calendarSlice = createSlice({
   name: "calendar",
   initialState,
-  reducers: {},
+  reducers: {
+    resetState: () => initialState,
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchEvents.pending, (state) => {
@@ -173,13 +175,14 @@ const calendarSlice = createSlice({
         // Parse and merge events from localStorage with fetched events
         // This allows for migration of any locally stored events when
         // the user first authenticates
-        const localStorageEvents = localStorage.getItem("events");
-        if (localStorageEvents && state.events.length === 0) {
-          const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
-          state.events = [...migratedEvents, ...action.payload];
-        } else {
-          state.events = action.payload;
-        }
+        // const localStorageEvents = localStorage.getItem("events");
+        // if (localStorageEvents && state.events.length === 0) {
+        //   const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
+        //   state.events = [...migratedEvents, ...action.payload];
+        // } else {
+        //   state.events = action.payload;
+        // }
+        state.events = action.payload;
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
@@ -205,6 +208,8 @@ const calendarSlice = createSlice({
       });
   },
 });
+
+export const { resetState } = calendarSlice.actions;
 
 export const calendar = (state: RootState) => state.calendar;
 export default calendarSlice.reducer;

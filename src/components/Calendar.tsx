@@ -43,7 +43,6 @@ import dayjs from "dayjs";
 import { orange } from "@mui/material/colors";
 import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { getAuth } from "firebase/auth";
 
 type ContextMenuType = {
   mouseX: number;
@@ -61,7 +60,6 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
-  const auth = getAuth();
 
   useEffect(() => {
     if (user?.uid) {
@@ -89,6 +87,7 @@ const Calendar = () => {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
+    console.log("🚀 ~ handleDateSelect ~ selectInfo:", selectInfo);
     const title = "New block";
     const calendarApi = selectInfo.view.calendar;
 
@@ -110,15 +109,12 @@ const Calendar = () => {
   };
 
   const handleEventAdd = (arg: EventAddArg) => {
+    console.log("🚀 ~ handleEventAdd ~ arg:", arg.event.toPlainObject());
     if (!user) {
       return;
     }
     const newEvent = {
       ...arg.event.toPlainObject(),
-      backgroundColor: orange[700],
-      extendedProps: {
-        description: "",
-      },
     } as CalendarEvent;
     dispatch(addEventToFirebase({ event: newEvent, userId: user.uid }));
   };
@@ -273,11 +269,9 @@ const Calendar = () => {
         <Box pr={4} height={1030}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
             <Avatar sx={{ bgcolor: "primary.main" }}>
-              {auth.currentUser?.email?.[0].toUpperCase() || "?"}
+              {user?.email?.[0].toUpperCase() || "?"}
             </Avatar>
-            <Typography>
-              {auth.currentUser?.email || "Not signed in"}
-            </Typography>
+            <Typography>{user?.email || "Not signed in"}</Typography>
           </Box>
           <DateCalendar />
           <Divider />

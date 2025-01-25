@@ -3,12 +3,20 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   signOut,
-  User,
+  UserMetadata,
 } from "firebase/auth";
 import { RootState } from "../store/store";
 
 interface AuthState {
-  user: User | null;
+  user: {
+    email: string | null | undefined;
+    uid: string | undefined;
+    displayName: string | null | undefined;
+    photoURL: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    metadata: UserMetadata | undefined;
+  } | null;
   loading: boolean;
   error: string | null;
 }
@@ -32,10 +40,16 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const logoutUser = createAsyncThunk("auth/logout", async () => {
-  const auth = getAuth();
-  await signOut(auth);
-});
+export const logoutUser = createAsyncThunk(
+  "auth/logout",
+  async (_, { dispatch }) => {
+    const auth = getAuth();
+    await signOut(auth);
+    dispatch(resetState());
+    // Clear calendar state too
+    dispatch({ type: "calendar/resetState" });
+  }
+);
 
 export const initializeAuth = createAsyncThunk("auth/initialize", async () => {
   const auth = getAuth();
@@ -48,14 +62,15 @@ export const initializeAuth = createAsyncThunk("auth/initialize", async () => {
     emailVerified: user?.emailVerified,
     isAnonymous: user?.isAnonymous,
     metadata: user?.metadata,
-    providerData: user?.providerData,
   };
 });
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    resetState: () => initialState,
+  },
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
@@ -75,10 +90,10 @@ const authSlice = createSlice({
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
         state.user = action.payload;
-        console.log("🚀 ~ .addCase ~ state.user:", state.user);
       });
   },
 });
 
 export const selectAuth = (state: RootState) => state.auth;
+export const { resetState } = authSlice.actions;
 export default authSlice.reducer;
