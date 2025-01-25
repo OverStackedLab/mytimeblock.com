@@ -15,7 +15,6 @@ import { getAuth } from "firebase/auth";
 const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
 const auth = getAuth();
-const user = auth.currentUser;
 
 export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
   return oldEvents.map((event) => {
@@ -51,27 +50,35 @@ export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
   async (userId: string) => {
+    const user = auth.currentUser;
     if (!user) {
       throw new Error("User not found");
     }
 
-    if (user?.email && user.email !== adminEmail) {
+    if (user?.email === adminEmail) {
+      // Only fetch events if user is admin
+      const docRef = doc(db, "events", userId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return docSnap.data().events || [];
+      }
+
+      // Initialize empty events array for new users
+      await setDoc(docRef, { events: [] }, { merge: true });
+
       return [];
     }
-
-    // Only fetch events if user is admin
-
-    const docRef = doc(db, "events", userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      return docSnap.data().events || [];
+    // Parse and merge events from localStorage with fetched events
+    // This allows for migration of any locally stored events when
+    // the user first authenticates
+    const localStorageEvents = localStorage.getItem("events");
+    if (localStorageEvents) {
+      const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
+      return migratedEvents;
+    } else {
+      return [];
     }
-
-    // Initialize empty events array for new users
-    await setDoc(docRef, { events: [] }, { merge: true });
-
-    return [];
   }
 );
 
@@ -87,25 +94,23 @@ export const setEvents = createAsyncThunk(
 export const addEventToFirebase = createAsyncThunk(
   "events/addEventToFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    const user = auth.currentUser;
     if (!user?.email || user.email !== adminEmail) {
       return event;
     }
-    try {
-      const docRef = doc(db, "events", userId);
-      await updateDoc(docRef, {
-        events: arrayUnion(event),
-      });
-      return event;
-    } catch (error) {
-      console.error("Error adding event to Firebase:", error);
-      throw error;
-    }
+
+    const docRef = doc(db, "events", userId);
+    await updateDoc(docRef, {
+      events: arrayUnion(event),
+    });
+    return event;
   }
 );
 
 export const updateEventInFirebase = createAsyncThunk(
   "events/updateEventInFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    const user = auth.currentUser;
     if (!user?.email || user.email !== adminEmail) {
       return event;
     }
@@ -133,6 +138,7 @@ export const updateEventInFirebase = createAsyncThunk(
 export const deleteEventFromFirebase = createAsyncThunk(
   "events/deleteEventFromFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
+    const user = auth.currentUser;
     if (!user?.email || user.email !== adminEmail) {
       return event;
     }
@@ -176,13 +182,9 @@ const calendarSlice = createSlice({
         state.loading = false;
         // Clear any existing error state
         state.error = null;
-        // Parse and merge events from localStorage with fetched events
-        // This allows for migration of any locally stored events when
-        // the user first authenticates
-        const localStorageEvents = localStorage.getItem("events");
-        if (localStorageEvents && state.events.length === 0) {
-          const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
-          state.events = [...migratedEvents, ...action.payload];
+
+        if (state.events.length === 0) {
+          state.events = action.payload;
         } else {
           state.events = [...state.events, ...action.payload];
         }

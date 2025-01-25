@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useAppDispatch } from "../hooks/useAppDispatch";
-// import { initializeAuth } from "../services/authSlice";
+import { initializeAuth } from "../services/authSlice";
 
 type User = {
   email: string | null | undefined;
@@ -49,7 +49,7 @@ const AuthContext = ({ children }: AuthContextProps) => {
       }
     });
 
-    // dispatch(initializeAuth());
+    dispatch(initializeAuth());
 
     return () => {
       if (unsubscribe) unsubscribe();

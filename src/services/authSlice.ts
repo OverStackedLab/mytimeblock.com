@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { RootState } from "../store/store";
 
-interface AuthState {
+type AuthState = {
   user: {
     email: string | null | undefined;
     uid: string;
@@ -13,7 +13,7 @@ interface AuthState {
   } | null;
   loading: boolean;
   error: string | null;
-}
+};
 
 const initialState: AuthState = {
   user: null,
@@ -91,7 +91,7 @@ const authSlice = createSlice({
       .addCase(initializeAuth.fulfilled, (state, action) => {
         state.user = {
           email: action.payload.email,
-          uid: action.payload.uid,
+          uid: action?.payload?.uid || "",
           displayName: action.payload.displayName,
           photoURL: action.payload.photoURL,
           emailVerified: action.payload.emailVerified,

@@ -66,7 +66,7 @@ const Calendar = () => {
       dispatch(fetchEvents(user?.uid || ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.uid]);
+  }, []);
 
   const handleContextMenu = (event: React.MouseEvent) => {
     setContextMenu(
