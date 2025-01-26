@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import { orange } from "@mui/material/colors";
 import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import useIsTouchDevice from "../hooks/useIsTouchDevice";
 
 type ContextMenuType = {
   mouseX: number;
@@ -50,6 +51,7 @@ type ContextMenuType = {
 } | null;
 
 const Calendar = () => {
+  const isTouchDevice = useIsTouchDevice();
   const { events } = useAppSelector(calendar);
   const dispatch = useAppDispatch();
   const [contextMenu, setContextMenu] = useState<ContextMenuType>(null);
@@ -193,6 +195,10 @@ const Calendar = () => {
     );
   };
 
+  const alertMessage = isTouchDevice
+    ? "Touch and hold a time slot to start creating events!"
+    : "Click or drag on a time slot to start creating events!";
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box px={4} py={1}>
@@ -212,7 +218,7 @@ const Calendar = () => {
             }
             sx={{ mb: 2 }}
           >
-            Click or drag on a time slot to start creating events!
+            {alertMessage}
           </Alert>
         </Collapse>
       </Box>
@@ -242,6 +248,9 @@ const Calendar = () => {
                 "contextmenu",
                 (event) => {
                   event.preventDefault();
+                  if (isTouchDevice) {
+                    return;
+                  }
                   handleContextMenu({
                     clientX: event.clientX,
                     clientY: event.clientY,
