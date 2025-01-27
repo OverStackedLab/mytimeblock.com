@@ -52,7 +52,9 @@ const AuthContext = ({ children }: AuthContextProps) => {
     dispatch(initializeAuth());
 
     return () => {
-      if (unsubscribe) unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, [auth, dispatch]);
 

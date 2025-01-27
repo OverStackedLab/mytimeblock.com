@@ -37,6 +37,18 @@
 
 /* Reset */
 
+/* Forms */
+.text-area {
+  box-sizing: border-box;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  padding: 12px;
+  border-radius: 12px 12px 0 12px;
+  border: 1px solid #0000003b;
+  background-color: #fafafa;
+}
+
 .light .fc {
   /* Button */
   & .fc-button:focus {
@@ -87,6 +99,17 @@
 }
 
 .dark {
+  .text-area {
+    background-color: transparent;
+    box-sizing: border-box;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 12px;
+    border-radius: 12px 12px 0 12px;
+    border: 1px solid #ffffff3b;
+    color: #fff;
+  }
   .fc-theme-standard td,
   .fc-theme-standard th {
     border: 1px solid #424242;

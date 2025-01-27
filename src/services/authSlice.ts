@@ -30,7 +30,14 @@ export const loginUser = createAsyncThunk(
       email,
       password
     );
-    return userCredential.user;
+    return {
+      email: userCredential.user.email,
+      uid: userCredential.user.uid,
+      displayName: userCredential.user.displayName,
+      photoURL: userCredential.user.photoURL,
+      emailVerified: userCredential.user.emailVerified,
+      isAnonymous: userCredential.user.isAnonymous,
+    };
   }
 );
 
@@ -39,9 +46,12 @@ export const logoutUser = createAsyncThunk(
   async (_, { dispatch }) => {
     const auth = getAuth();
     await signOut(auth);
-    dispatch(resetState());
-    // Clear calendar state too
-    dispatch({ type: "calendar/resetState" });
+
+    // Reset all slices
+    dispatch(resetState()); // auth reset
+    // dispatch({ type: "calendar/resetState" });
+    // dispatch({ type: "preferences/resetState" });
+    // dispatch({ type: "pomodoro/resetState" });
   }
 );
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState } from "react";
 import { Radio, RadioGroup, Box, Popover, ButtonBase } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -26,6 +26,13 @@ import {
 } from "@mui/material/colors";
 import { Controller, Control } from "react-hook-form";
 import { FormValues } from "./EventEditor";
+import {
+  selectPreferences,
+  updatePreferences,
+} from "../services/preferencesSlice";
+import { useAppSelector } from "../hooks/useAppSlector";
+import { useAppDispatch } from "../hooks/useAppDispatch";
+import { Context } from "../context/AuthContext";
 
 type ColorPickerProps = {
   value?: string;
@@ -57,23 +64,20 @@ const miscColors = [
   lime[500],
 ];
 
-const STORAGE_KEY = "colorPicker.availableColors";
-
 const ColorPicker = ({
   value = orange[700],
   onChange = () => {},
   colors = defaultColors,
   control,
 }: ColorPickerProps) => {
+  const { eventColors } = useAppSelector(selectPreferences);
+  const dispatch = useAppDispatch();
+  const { user } = useContext(Context);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [availableColors, setAvailableColors] = useState<string[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : colors;
+    const stored = eventColors;
+    return stored ? stored : colors;
   });
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(availableColors));
-  }, [availableColors]);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -87,6 +91,14 @@ const ColorPicker = ({
     setAvailableColors((prev) => {
       if (prev.includes(color)) {
         return prev;
+      }
+      if (user && user?.uid) {
+        dispatch(
+          updatePreferences({
+            preferences: { eventColors: [...prev, color] },
+            userId: user?.uid,
+          })
+        );
       }
       return [...prev, color];
     });

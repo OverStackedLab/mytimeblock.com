@@ -69,16 +69,7 @@ export const fetchEvents = createAsyncThunk(
 
       return [];
     }
-    // Parse and merge events from localStorage with fetched events
-    // This allows for migration of any locally stored events when
-    // the user first authenticates
-    const localStorageEvents = localStorage.getItem("events");
-    if (localStorageEvents) {
-      const migratedEvents = migrateEvents(JSON.parse(localStorageEvents));
-      return migratedEvents;
-    } else {
-      return [];
-    }
+    return [];
   }
 );
 

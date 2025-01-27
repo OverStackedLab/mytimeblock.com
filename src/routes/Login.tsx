@@ -12,11 +12,11 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/config";
 import Header from "../components/Header";
 import { useColorScheme } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { loginUser } from "../services/authSlice";
+import { useAppDispatch } from "../hooks/useAppDispatch";
 
 type LoginFormData = {
   email: string;
@@ -25,6 +25,7 @@ type LoginFormData = {
 
 const Login = () => {
   const { mode } = useColorScheme();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -53,7 +54,10 @@ const Login = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      // await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      await dispatch(
+        loginUser({ email: formData.email, password: formData.password })
+      );
       setSuccess("Logged in successfully!");
       setFormData({ email: "", password: "" });
       navigate("/dashboard");

@@ -10,18 +10,18 @@ import timeblock from "../assets/timeblock.png";
 import { useNavigate, useLocation } from "react-router";
 import { Context } from "../context/AuthContext";
 import { useContext } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { logoutUser } from "../services/authSlice";
+import { useAppDispatch } from "../hooks/useAppDispatch";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useContext(Context);
-
+  const dispatch = useAppDispatch();
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await dispatch(logoutUser());
       navigate("/signup");
     } catch (error) {
       console.error("Error signing out:", error);
