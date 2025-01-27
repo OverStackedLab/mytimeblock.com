@@ -81,7 +81,7 @@ const Pomodoro = () => {
     if (!isNaN(value) && value > 0) {
       dispatch(updateSettings({ longBreakDuration: value * 60 }));
     } else {
-      dispatch(updateSettings({ longBreakDuration: 0 * 60 }));
+      dispatch(updateSettings({ longBreakDuration: 0 }));
     }
   };
 
