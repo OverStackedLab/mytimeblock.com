@@ -22,8 +22,9 @@ import pomodoroReducer from "../services/pomodoroSlice";
 
 const persistConfig = {
   key: "root",
-  version: 1.3,
+  version: 1.4,
   storage,
+  whitelist: ["auth", "calendar", "preferences", "pomodoro"],
 };
 
 const rootReducer = combineReducers({

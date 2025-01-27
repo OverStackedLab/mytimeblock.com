@@ -12,6 +12,7 @@ interface PomodoroState {
   longBreakDuration: number;
   sessionsBeforeLongBreak: number;
   completedSessions: number;
+  totalIntervals: number;
 }
 
 const initialState: PomodoroState = {
@@ -23,6 +24,7 @@ const initialState: PomodoroState = {
   longBreakDuration: 15 * 60,
   sessionsBeforeLongBreak: 4,
   completedSessions: 0,
+  totalIntervals: 12,
 };
 
 const pomodoroSlice = createSlice({
@@ -40,6 +42,7 @@ const pomodoroSlice = createSlice({
       state.timeLeft = state.workDuration;
       state.mode = "focus";
       state.completedSessions = 0;
+      state.totalIntervals = initialState.totalIntervals;
     },
     tick: (state) => {
       if (state.timeLeft > 0) {
@@ -49,6 +52,14 @@ const pomodoroSlice = createSlice({
     switchMode: (state) => {
       if (state.mode === "focus") {
         state.completedSessions += 1;
+
+        // Check if all intervals are completed
+        if (state.completedSessions >= state.totalIntervals) {
+          state.isRunning = false;
+          state.completedSessions = state.totalIntervals;
+          return;
+        }
+
         if (state.completedSessions % state.sessionsBeforeLongBreak === 0) {
           state.mode = "longBreak";
           state.timeLeft = state.longBreakDuration;
@@ -69,6 +80,7 @@ const pomodoroSlice = createSlice({
         breakDuration?: number;
         longBreakDuration?: number;
         sessionsBeforeLongBreak?: number;
+        totalIntervals?: number;
       }>
     ) => {
       if (action.payload.workDuration) {
@@ -92,6 +104,20 @@ const pomodoroSlice = createSlice({
       if (action.payload.sessionsBeforeLongBreak) {
         state.sessionsBeforeLongBreak = action.payload.sessionsBeforeLongBreak;
       }
+      if (action.payload.totalIntervals) {
+        state.totalIntervals = action.payload.totalIntervals;
+      }
+    },
+    resetSettings: (state) => {
+      state.workDuration = initialState.workDuration;
+      state.breakDuration = initialState.breakDuration;
+      state.longBreakDuration = initialState.longBreakDuration;
+      state.sessionsBeforeLongBreak = initialState.sessionsBeforeLongBreak;
+      state.totalIntervals = initialState.totalIntervals;
+      state.timeLeft = initialState.workDuration;
+      state.mode = "focus";
+      state.isRunning = false;
+      state.completedSessions = 0;
     },
   },
 });
@@ -103,6 +129,7 @@ export const {
   tick,
   switchMode,
   updateSettings,
+  resetSettings,
 } = pomodoroSlice.actions;
 
 export const selectPomodoro = (state: RootState) => state.pomodoro;

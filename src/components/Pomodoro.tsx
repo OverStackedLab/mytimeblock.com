@@ -8,12 +8,35 @@ import {
   resetTimer,
   tick,
   switchMode,
+  updateSettings,
+  resetSettings,
 } from "../services/pomodoroSlice";
-import { Box, Button, Typography, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Stack,
+  TextField,
+  IconButton,
+  Button,
+} from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 const Pomodoro = () => {
   const dispatch = useAppDispatch();
-  const { isRunning, timeLeft, mode } = useAppSelector(selectPomodoro);
+  const {
+    isRunning,
+    timeLeft,
+    mode,
+    workDuration,
+    breakDuration,
+    longBreakDuration,
+    sessionsBeforeLongBreak,
+    completedSessions,
+    totalIntervals,
+  } = useAppSelector(selectPomodoro);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -32,10 +55,51 @@ const Pomodoro = () => {
 
   const progress =
     mode === "focus"
-      ? (timeLeft / (25 * 60)) * 100
+      ? (timeLeft / workDuration) * 100
       : mode === "break"
-      ? (timeLeft / (5 * 60)) * 100
-      : (timeLeft / (15 * 60)) * 100;
+      ? (timeLeft / breakDuration) * 100
+      : (timeLeft / longBreakDuration) * 100;
+
+  const handleFocusMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      dispatch(updateSettings({ workDuration: value * 60 }));
+    }
+  };
+
+  const handleBreakMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      dispatch(updateSettings({ breakDuration: value * 60 }));
+    }
+  };
+
+  const handleLongBreakMinutesChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      dispatch(updateSettings({ longBreakDuration: value * 60 }));
+    } else {
+      dispatch(updateSettings({ longBreakDuration: 0 * 60 }));
+    }
+  };
+
+  const handleIntervalsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      dispatch(updateSettings({ sessionsBeforeLongBreak: value }));
+    }
+  };
+
+  const handleTotalIntervalsChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      dispatch(updateSettings({ totalIntervals: value }));
+    }
+  };
 
   return (
     <Box
@@ -72,17 +136,84 @@ const Pomodoro = () => {
           </Typography>
         </Box>
       </Box>
-      <Box display="flex" gap={1}>
+      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <IconButton
+          onClick={() => dispatch(isRunning ? pauseTimer() : startTimer())}
+          color="primary"
+          size="large"
+        >
+          {isRunning ? <PauseIcon /> : <PlayArrowIcon />}
+        </IconButton>
+        <IconButton
+          onClick={() => dispatch(resetTimer())}
+          color="secondary"
+          size="large"
+        >
+          <RestartAltIcon />
+        </IconButton>
+        <Typography color="text.secondary" sx={{ alignSelf: "center" }}>
+          {completedSessions}/{totalIntervals}
+        </Typography>
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ mb: 2, px: 3 }}>
+        <TextField
+          label="Focus"
+          type="number"
+          size="small"
+          value={workDuration / 60 || ""}
+          onChange={handleFocusMinutesChange}
+          disabled={isRunning}
+          sx={{ width: 80 }}
+        />
+        <TextField
+          label="Me Time"
+          type="number"
+          size="small"
+          value={breakDuration / 60 || ""}
+          onChange={handleBreakMinutesChange}
+          disabled={isRunning}
+          sx={{ width: 80 }}
+        />
+        <TextField
+          label="Intervals"
+          type="number"
+          size="small"
+          value={totalIntervals || ""}
+          onChange={handleTotalIntervalsChange}
+          disabled={isRunning}
+          sx={{ width: 90 }}
+        />
+      </Stack>
+      <Stack direction="row" spacing={2} sx={{ mb: 2, width: "100%", px: 3 }}>
+        <TextField
+          label="Break After"
+          type="number"
+          size="small"
+          value={sessionsBeforeLongBreak || ""}
+          onChange={handleIntervalsChange}
+          disabled={isRunning}
+          sx={{ width: 80 }}
+        />
+        <TextField
+          label="Long Break"
+          type="number"
+          size="small"
+          value={longBreakDuration / 60 || ""}
+          onChange={handleLongBreakMinutesChange}
+          disabled={isRunning}
+          sx={{ width: 90 }}
+        />
+
         <Button
           variant="contained"
-          onClick={() => dispatch(isRunning ? pauseTimer() : startTimer())}
+          onClick={() => dispatch(resetSettings())}
+          size="small"
+          disabled={isRunning}
+          sx={{ color: "white" }}
         >
-          {isRunning ? "Pause" : "Start"}
+          Default
         </Button>
-        <Button variant="outlined" onClick={() => dispatch(resetTimer())}>
-          Reset
-        </Button>
-      </Box>
+      </Stack>
     </Box>
   );
 };
