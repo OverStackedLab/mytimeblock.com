@@ -54,7 +54,7 @@ const Pomodoro = () => {
           autoHideDuration: 3000,
           anchorOrigin: {
             vertical: "top",
-            horizontal: "center",
+            horizontal: "right",
           },
         });
       } else if (mode === "break" || mode === "longBreak") {
@@ -63,23 +63,10 @@ const Pomodoro = () => {
           autoHideDuration: 3000,
           anchorOrigin: {
             vertical: "top",
-            horizontal: "center",
+            horizontal: "right",
           },
         });
       }
-
-      // Play notification sound
-      const audio = new Audio("/notification.mp3");
-      audio.play().catch(() => {
-        enqueueSnackbar("Audio playback blocked", {
-          variant: "error",
-          autoHideDuration: 3000,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
-          },
-        });
-      });
 
       dispatch(switchMode());
     }

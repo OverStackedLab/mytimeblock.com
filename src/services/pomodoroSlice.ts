@@ -51,33 +51,29 @@ const pomodoroSlice = createSlice({
     },
     switchMode: (state) => {
       if (state.mode === "focus") {
-        if (state.completedSessions) {
-          state.completedSessions += 1;
-        }
+        state.completedSessions += 1;
 
         // Check if all intervals are completed
-        if (state.completedSessions && state.totalIntervals) {
-          if (state.completedSessions >= state.totalIntervals) {
-            state.isRunning = false;
-            state.completedSessions = state.totalIntervals;
-            return;
-          }
+        if (state.completedSessions >= state.totalIntervals) {
+          state.isRunning = false;
+          state.completedSessions = state.totalIntervals;
+          return;
         }
 
-        if (state.completedSessions && state.sessionsBeforeLongBreak) {
-          if (state.completedSessions % state.sessionsBeforeLongBreak === 0) {
-            state.mode = "longBreak";
-            state.timeLeft = state.longBreakDuration;
-          } else {
-            state.mode = "break";
-            state.timeLeft = state.breakDuration;
-          }
+        // Switch to appropriate break mode and continue running
+        if (state.completedSessions % state.sessionsBeforeLongBreak === 0) {
+          state.mode = "longBreak";
+          state.timeLeft = state.longBreakDuration;
+        } else {
+          state.mode = "break";
+          state.timeLeft = state.breakDuration;
         }
-        state.isRunning = true; // Auto-start break
+        state.isRunning = true; // Keep timer running during break
       } else {
+        // Switch back to focus mode and continue running
         state.mode = "focus";
         state.timeLeft = state.workDuration;
-        state.isRunning = true; // Auto-start next focus session
+        state.isRunning = true; // Keep timer running during focus
       }
     },
     updateSettings: (
@@ -90,6 +86,7 @@ const pomodoroSlice = createSlice({
         totalIntervals?: number;
       }>
     ) => {
+      // Allow the user to clear the settings
       if (action.payload.workDuration === 0) {
         state.workDuration = 0;
       }
