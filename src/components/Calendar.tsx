@@ -12,15 +12,7 @@ import {
   EventClickArg,
   EventDropArg,
 } from "@fullcalendar/core";
-import {
-  Alert,
-  IconButton,
-  Box,
-  Collapse,
-  Divider,
-  Typography,
-  Avatar,
-} from "@mui/material";
+import { Alert, IconButton, Box, Collapse, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
 import {
@@ -44,6 +36,9 @@ import { orange } from "@mui/material/colors";
 import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import useIsTouchDevice from "../hooks/useIsTouchDevice";
+import UserInfo from "./UserInfo";
+
+const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
 type ContextMenuType = {
   mouseX: number;
@@ -64,7 +59,7 @@ const Calendar = () => {
   );
 
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.uid && user?.email === adminEmail) {
       dispatch(fetchEvents(user?.uid || ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -288,12 +283,7 @@ const Calendar = () => {
           </Menu>
         </Box>
         <Box pr={4} height={1030}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Avatar sx={{ bgcolor: "primary.main" }}>
-              {user?.email?.[0].toUpperCase() || "?"}
-            </Avatar>
-            <Typography>{user?.email || "Not signed in"}</Typography>
-          </Box>
+          <UserInfo />
           <DateCalendar />
           <Divider />
           <Pomodoro />

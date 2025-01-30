@@ -25,7 +25,7 @@ import {
   yellow,
 } from "@mui/material/colors";
 import { Controller, Control } from "react-hook-form";
-import { FormValues } from "./EventEditor";
+import type { FormValues } from "./EventEditor";
 import {
   selectPreferences,
   updatePreferences,
@@ -51,7 +51,7 @@ const defaultColors = [
   grey[500],
 ];
 
-const miscColors = [
+const optionalColors = [
   brown[600],
   pink[500],
   deepOrange[700],
@@ -67,16 +67,15 @@ const miscColors = [
 const ColorPicker = ({
   value = orange[700],
   onChange = () => {},
-  colors = defaultColors,
   control,
 }: ColorPickerProps) => {
   const { eventSwatches } = useAppSelector(selectPreferences);
   const dispatch = useAppDispatch();
   const { user } = useContext(Context);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [availableColors, setAvailableColors] = useState<string[]>(() => {
+  const [swatches, setSwatches] = useState<string[]>(() => {
     const stored = eventSwatches;
-    return stored ? stored : colors;
+    return stored.length > 0 ? stored : defaultColors;
   });
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -88,7 +87,7 @@ const ColorPicker = ({
   };
 
   const handleAddColor = (color: string) => {
-    setAvailableColors((prev) => {
+    setSwatches((prev) => {
       if (prev.includes(color)) {
         return prev;
       }
@@ -110,7 +109,7 @@ const ColorPicker = ({
 
   return (
     <Controller
-      name="eventColor"
+      name="eventSwatch"
       control={control}
       render={({ field }) => {
         return (
@@ -124,7 +123,7 @@ const ColorPicker = ({
                 flex: 1,
               }}
             >
-              {availableColors.map((color, index) => (
+              {swatches.map((color, index) => (
                 <Radio
                   key={index}
                   value={color}
@@ -156,7 +155,7 @@ const ColorPicker = ({
                   value={value}
                   onChange={(e) => handleAddColor(e.target.value)}
                 >
-                  {miscColors.map((color, index) => (
+                  {optionalColors.map((color, index) => (
                     <Radio
                       key={index}
                       value={color}

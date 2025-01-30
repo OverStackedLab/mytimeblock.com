@@ -11,6 +11,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { orange } from "@mui/material/colors";
 
 const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
 
@@ -38,7 +39,7 @@ export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
       title: String(event.title || ""),
       start: startDate,
       end: endDate,
-      backgroundColor: String(event.color || ""),
+      backgroundColor: String(event.color || orange[700]),
       allDay: Boolean(event.allDay),
       extendedProps: {
         description: String(event.description || ""),
@@ -76,6 +77,11 @@ export const fetchEvents = createAsyncThunk(
 export const setEvents = createAsyncThunk(
   "events/setEvents",
   async ({ events, userId }: { events: CalendarEvent[]; userId: string }) => {
+    const user = auth.currentUser;
+    if (!user?.email || user.email !== adminEmail) {
+      return events;
+    }
+
     const docRef = doc(db, "events", userId);
     await setDoc(docRef, { events }, { merge: true });
     return events;
@@ -173,11 +179,10 @@ const calendarSlice = createSlice({
         state.loading = false;
         // Clear any existing error state
         state.error = null;
-
-        if (state.events.length === 0) {
+        state.events = action.payload;
+        const user = auth.currentUser;
+        if (user?.email === adminEmail) {
           state.events = action.payload;
-        } else {
-          state.events = [...state.events, ...action.payload];
         }
       })
       .addCase(fetchEvents.rejected, (state, action) => {
@@ -201,6 +206,10 @@ const calendarSlice = createSlice({
         state.events = state.events.filter(
           (event) => event.id !== action.payload.id
         );
+      })
+      .addCase(setEvents.fulfilled, (state, action) => {
+        state.loading = false;
+        state.events = [...state.events, ...action.payload];
       });
   },
 });

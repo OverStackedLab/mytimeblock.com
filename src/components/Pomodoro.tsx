@@ -50,7 +50,6 @@ const Pomodoro = () => {
       // Show different messages based on completed mode
       if (mode === "focus") {
         enqueueSnackbar("Focus time complete! Time for a break.", {
-          variant: "success",
           autoHideDuration: 3000,
           anchorOrigin: {
             vertical: "top",
@@ -59,7 +58,6 @@ const Pomodoro = () => {
         });
       } else if (mode === "break" || mode === "longBreak") {
         enqueueSnackbar("Break time over! Let's focus again.", {
-          variant: "info",
           autoHideDuration: 3000,
           anchorOrigin: {
             vertical: "top",

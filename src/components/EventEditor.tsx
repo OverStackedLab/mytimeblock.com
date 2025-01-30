@@ -28,7 +28,7 @@ export type FormValues = {
   eventDate: Dayjs;
   eventStartTime: Dayjs;
   eventEndTime: Dayjs;
-  eventColor: string;
+  eventSwatch: string;
   eventStartDate?: Dayjs;
   eventEndDate?: Dayjs;
 };
@@ -55,7 +55,7 @@ const EventEditor = forwardRef(
         eventStartTime: today.startOf("hour"),
         eventEndTime: today.endOf("hour").add(30, "minute"),
         eventDescription: "",
-        eventColor: orange[700],
+        eventSwatch: orange[700],
       },
     });
 
@@ -77,7 +77,7 @@ const EventEditor = forwardRef(
           event?.extendedProps?.description || ""
         );
         formContext.setValue(
-          "eventColor",
+          "eventSwatch",
           event?.backgroundColor || orange[700]
         );
         if (event?.allDay) {
