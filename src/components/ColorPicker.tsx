@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Radio, RadioGroup, Box, Popover, ButtonBase } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -29,6 +29,7 @@ import type { FormValues } from "./EventEditor";
 import {
   selectPreferences,
   updatePreferences,
+  fetchPreferences,
 } from "../services/preferencesSlice";
 import { useAppSelector } from "../hooks/useAppSlector";
 import { useAppDispatch } from "../hooks/useAppDispatch";
@@ -64,6 +65,8 @@ const optionalColors = [
   lime[500],
 ];
 
+const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+
 const ColorPicker = ({
   value = orange[700],
   onChange = () => {},
@@ -77,6 +80,13 @@ const ColorPicker = ({
     const stored = eventSwatches;
     return stored.length > 0 ? stored : defaultColors;
   });
+
+  useEffect(() => {
+    if (user?.uid && user?.email === adminEmail) {
+      dispatch(fetchPreferences(user?.uid));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
