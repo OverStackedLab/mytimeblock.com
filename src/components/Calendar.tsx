@@ -53,10 +53,12 @@ const Calendar = () => {
   const { user } = useContext(Context);
   const [alertOpen, setAlertOpen] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const childRef = useRef<EditorHandle>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
+
+  const childRef = useRef<EditorHandle>(null);
+  const calendarRef = useRef<FullCalendar>(null);
 
   useEffect(() => {
     if (user?.uid && user?.email === adminEmail) {
@@ -190,6 +192,13 @@ const Calendar = () => {
     );
   };
 
+  const handleDateChange = (date: Date) => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(dayjs(date).format("YYYY-MM-DD"));
+    }
+  };
+
   const alertMessage = isTouchDevice
     ? "Touch and hold a time slot to start creating events!"
     : "Click or drag on a time slot to start creating events!";
@@ -220,6 +229,7 @@ const Calendar = () => {
       <Box display="flex">
         <Box mb={4} px={4} width="100%">
           <FullCalendar
+            ref={calendarRef}
             headerToolbar={{
               left: "today,prev,next",
               center: "title",
@@ -284,7 +294,7 @@ const Calendar = () => {
         </Box>
         <Box pr={4} height={1030}>
           <UserInfo />
-          <DateCalendar />
+          <DateCalendar onChange={handleDateChange} />
           <Divider />
           <Pomodoro />
         </Box>
