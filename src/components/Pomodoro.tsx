@@ -46,7 +46,7 @@ const Pomodoro = () => {
       interval = setInterval(() => {
         dispatch(tick());
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (timeLeft === 0 && isRunning) {
       // Show different messages based on completed mode
       if (mode === "focus") {
         enqueueSnackbar("Focus time complete! Time for a break.", {
