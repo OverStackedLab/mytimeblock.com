@@ -70,12 +70,12 @@ const ColorPicker = ({
   colors = defaultColors,
   control,
 }: ColorPickerProps) => {
-  const { eventColors } = useAppSelector(selectPreferences);
+  const { eventSwatches } = useAppSelector(selectPreferences);
   const dispatch = useAppDispatch();
   const { user } = useContext(Context);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [availableColors, setAvailableColors] = useState<string[]>(() => {
-    const stored = eventColors;
+    const stored = eventSwatches;
     return stored ? stored : colors;
   });
 
@@ -95,7 +95,7 @@ const ColorPicker = ({
       if (user && user?.uid) {
         dispatch(
           updatePreferences({
-            preferences: { eventColors: [...prev, color] },
+            preferences: { eventSwatches: [...prev, color] },
             userId: user?.uid,
           })
         );

@@ -5,13 +5,13 @@ import { getAuth } from "firebase/auth";
 import { RootState } from "../store/store";
 
 type PreferencesState = {
-  eventColors: string[];
+  eventSwatches: string[];
   loading: boolean;
   error: string | null;
 };
 
 const initialState: PreferencesState = {
-  eventColors: [], // Default orange
+  eventSwatches: [], // Default orange
   loading: false,
   error: null,
 };
@@ -63,16 +63,16 @@ const preferencesSlice = createSlice({
       })
       .addCase(fetchPreferences.fulfilled, (state, action) => {
         state.loading = false;
-        state.eventColors =
-          action.payload.eventColors || initialState.eventColors;
+        state.eventSwatches =
+          action.payload.eventSwatches || initialState.eventSwatches;
       })
       .addCase(fetchPreferences.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || null;
       })
       .addCase(updatePreferences.fulfilled, (state, action) => {
-        if (action.payload.eventColors) {
-          state.eventColors = action.payload.eventColors;
+        if (action.payload.eventSwatches) {
+          state.eventSwatches = action.payload.eventSwatches;
         }
       });
   },
