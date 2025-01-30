@@ -3,17 +3,17 @@ import { RootState } from "../store/store";
 
 type TimerMode = "focus" | "break" | "longBreak";
 
-interface PomodoroState {
+type PomodoroState = {
   isRunning: boolean;
-  timeLeft: number;
   mode: TimerMode;
+  timeLeft: number;
   workDuration: number;
   breakDuration: number;
   longBreakDuration: number;
   sessionsBeforeLongBreak: number;
   completedSessions: number;
   totalIntervals: number;
-}
+};
 
 const initialState: PomodoroState = {
   isRunning: false,
@@ -45,33 +45,40 @@ const pomodoroSlice = createSlice({
       state.totalIntervals = initialState.totalIntervals;
     },
     tick: (state) => {
-      if (state.timeLeft > 0) {
+      if (state.timeLeft && state.timeLeft > 0) {
         state.timeLeft -= 1;
       }
     },
     switchMode: (state) => {
       if (state.mode === "focus") {
-        state.completedSessions += 1;
+        if (state.completedSessions) {
+          state.completedSessions += 1;
+        }
 
         // Check if all intervals are completed
-        if (state.completedSessions >= state.totalIntervals) {
-          state.isRunning = false;
-          state.completedSessions = state.totalIntervals;
-          return;
+        if (state.completedSessions && state.totalIntervals) {
+          if (state.completedSessions >= state.totalIntervals) {
+            state.isRunning = false;
+            state.completedSessions = state.totalIntervals;
+            return;
+          }
         }
 
-        if (state.completedSessions % state.sessionsBeforeLongBreak === 0) {
-          state.mode = "longBreak";
-          state.timeLeft = state.longBreakDuration;
-        } else {
-          state.mode = "break";
-          state.timeLeft = state.breakDuration;
+        if (state.completedSessions && state.sessionsBeforeLongBreak) {
+          if (state.completedSessions % state.sessionsBeforeLongBreak === 0) {
+            state.mode = "longBreak";
+            state.timeLeft = state.longBreakDuration;
+          } else {
+            state.mode = "break";
+            state.timeLeft = state.breakDuration;
+          }
         }
+        state.isRunning = true; // Auto-start break
       } else {
         state.mode = "focus";
         state.timeLeft = state.workDuration;
+        state.isRunning = true; // Auto-start next focus session
       }
-      state.isRunning = false;
     },
     updateSettings: (
       state,
@@ -83,6 +90,22 @@ const pomodoroSlice = createSlice({
         totalIntervals?: number;
       }>
     ) => {
+      if (action.payload.workDuration === 0) {
+        state.workDuration = 0;
+      }
+      if (action.payload.breakDuration === 0) {
+        state.breakDuration = 0;
+      }
+      if (action.payload.longBreakDuration === 0) {
+        state.longBreakDuration = 0;
+      }
+      if (action.payload.sessionsBeforeLongBreak === 0) {
+        state.sessionsBeforeLongBreak = 0;
+      }
+      if (action.payload.totalIntervals === 0) {
+        state.totalIntervals = 0;
+      }
+
       if (action.payload.workDuration) {
         state.workDuration = action.payload.workDuration;
         if (state.mode === "focus") {

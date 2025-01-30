@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSlector";
+import { useSnackbar } from "notistack";
 import {
   selectPomodoro,
   startTimer,
@@ -26,6 +27,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 
 const Pomodoro = () => {
   const dispatch = useAppDispatch();
+  const { enqueueSnackbar } = useSnackbar();
   const {
     isRunning,
     timeLeft,
@@ -40,30 +42,73 @@ const Pomodoro = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isRunning && timeLeft > 0) {
+    if (isRunning && timeLeft && timeLeft > 0) {
       interval = setInterval(() => {
         dispatch(tick());
       }, 1000);
     } else if (timeLeft === 0) {
+      // Show different messages based on completed mode
+      if (mode === "focus") {
+        enqueueSnackbar("Focus time complete! Time for a break.", {
+          variant: "success",
+          autoHideDuration: 3000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+        });
+      } else if (mode === "break" || mode === "longBreak") {
+        enqueueSnackbar("Break time over! Let's focus again.", {
+          variant: "info",
+          autoHideDuration: 3000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+        });
+      }
+
+      // Play notification sound
+      const audio = new Audio("/notification.mp3");
+      audio.play().catch(() => {
+        enqueueSnackbar("Audio playback blocked", {
+          variant: "error",
+          autoHideDuration: 3000,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+        });
+      });
+
       dispatch(switchMode());
     }
     return () => clearInterval(interval);
-  }, [isRunning, timeLeft, dispatch]);
+  }, [isRunning, timeLeft, dispatch, mode, enqueueSnackbar]);
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const minutes = timeLeft ? Math.floor(timeLeft / 60) : 0;
+  const seconds = timeLeft ? timeLeft % 60 : 0;
 
   const progress =
-    mode === "focus"
-      ? (timeLeft / workDuration) * 100
+    100 -
+    (mode === "focus"
+      ? timeLeft && workDuration
+        ? (timeLeft / workDuration) * 100
+        : 0
       : mode === "break"
-      ? (timeLeft / breakDuration) * 100
-      : (timeLeft / longBreakDuration) * 100;
+      ? timeLeft && breakDuration
+        ? (timeLeft / breakDuration) * 100
+        : 0
+      : timeLeft && longBreakDuration
+      ? (timeLeft / longBreakDuration) * 100
+      : 0);
 
   const handleFocusMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       dispatch(updateSettings({ workDuration: value * 60 }));
+    } else {
+      dispatch(updateSettings({ workDuration: 0 }));
     }
   };
 
@@ -71,6 +116,8 @@ const Pomodoro = () => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       dispatch(updateSettings({ breakDuration: value * 60 }));
+    } else {
+      dispatch(updateSettings({ breakDuration: 0 }));
     }
   };
 
@@ -89,6 +136,8 @@ const Pomodoro = () => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       dispatch(updateSettings({ sessionsBeforeLongBreak: value }));
+    } else {
+      dispatch(updateSettings({ sessionsBeforeLongBreak: 0 }));
     }
   };
 
@@ -98,6 +147,8 @@ const Pomodoro = () => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       dispatch(updateSettings({ totalIntervals: value }));
+    } else {
+      dispatch(updateSettings({ totalIntervals: 0 }));
     }
   };
 
@@ -113,6 +164,16 @@ const Pomodoro = () => {
         {mode.charAt(0).toUpperCase() + mode.slice(1)} Time
       </Typography>
       <Box position="relative" display="inline-flex">
+        <CircularProgress
+          variant="determinate"
+          value={100}
+          size={180}
+          thickness={4}
+          sx={{
+            color: "grey.200",
+            position: "absolute",
+          }}
+        />
         <CircularProgress
           variant="determinate"
           value={progress}
@@ -141,6 +202,13 @@ const Pomodoro = () => {
           onClick={() => dispatch(isRunning ? pauseTimer() : startTimer())}
           color="primary"
           size="large"
+          disabled={
+            workDuration === 0 ||
+            breakDuration === 0 ||
+            totalIntervals === 0 ||
+            sessionsBeforeLongBreak === 0 ||
+            longBreakDuration === 0
+          }
         >
           {isRunning ? <PauseIcon /> : <PlayArrowIcon />}
         </IconButton>
@@ -157,28 +225,34 @@ const Pomodoro = () => {
       </Stack>
       <Stack direction="row" spacing={2} sx={{ mb: 2, px: 3 }}>
         <TextField
+          error={workDuration === 0}
           label="Focus"
           type="number"
           size="small"
-          value={workDuration / 60 || ""}
+          required
+          value={workDuration === 0 ? "" : workDuration / 60}
           onChange={handleFocusMinutesChange}
           disabled={isRunning}
           sx={{ width: 80 }}
         />
         <TextField
+          error={breakDuration === 0}
           label="Me Time"
           type="number"
           size="small"
-          value={breakDuration / 60 || ""}
+          required
+          value={breakDuration === 0 ? "" : breakDuration / 60}
           onChange={handleBreakMinutesChange}
           disabled={isRunning}
           sx={{ width: 80 }}
         />
         <TextField
+          error={totalIntervals === 0}
           label="Intervals"
           type="number"
           size="small"
-          value={totalIntervals || ""}
+          required
+          value={totalIntervals === 0 ? "" : totalIntervals}
           onChange={handleTotalIntervalsChange}
           disabled={isRunning}
           sx={{ width: 90 }}
@@ -186,19 +260,23 @@ const Pomodoro = () => {
       </Stack>
       <Stack direction="row" spacing={2} sx={{ mb: 2, width: "100%", px: 3 }}>
         <TextField
+          error={sessionsBeforeLongBreak === 0}
           label="Break After"
           type="number"
           size="small"
-          value={sessionsBeforeLongBreak || ""}
+          required
+          value={sessionsBeforeLongBreak === 0 ? "" : sessionsBeforeLongBreak}
           onChange={handleIntervalsChange}
           disabled={isRunning}
           sx={{ width: 80 }}
         />
         <TextField
+          error={longBreakDuration === 0}
           label="Long Break"
           type="number"
           size="small"
-          value={longBreakDuration / 60 || ""}
+          required
+          value={longBreakDuration === 0 ? "" : longBreakDuration / 60}
           onChange={handleLongBreakMinutesChange}
           disabled={isRunning}
           sx={{ width: 90 }}
