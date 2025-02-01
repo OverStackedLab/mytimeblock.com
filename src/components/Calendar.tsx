@@ -132,6 +132,28 @@ const Calendar = () => {
     );
   };
 
+  const handleDuplicateEvent = (event: CalendarEvent) => {
+    if (!user) {
+      return;
+    }
+
+    const duplicatedEvent = {
+      ...event,
+      id: generateId(),
+      start: dayjs(event.start)
+        .add(30, "minute")
+        .format("YYYY-MM-DDTHH:mm:ssZ"),
+      end: dayjs(event.end).add(30, "minute").format("YYYY-MM-DDTHH:mm:ssZ"),
+    };
+
+    dispatch(
+      addEventToFirebase({
+        event: duplicatedEvent,
+        userId: user.uid || "",
+      })
+    );
+  };
+
   const handleEventUpdate = (event: CalendarEvent) => {
     if (!user) {
       return;
@@ -279,7 +301,16 @@ const Calendar = () => {
                 : undefined
             }
           >
-            <MenuItem onClick={handleClose}>Duplicate</MenuItem>
+            <MenuItem
+              onClick={() => {
+                if (selectedEvent) {
+                  handleDuplicateEvent(selectedEvent);
+                  handleClose();
+                }
+              }}
+            >
+              Duplicate
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 if (selectedEvent) {
