@@ -31,7 +31,7 @@ import { CalendarEvent } from "../@types/Events";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Context } from "../context/AuthContext";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { orange } from "@mui/material/colors";
 import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -56,7 +56,7 @@ const Calendar = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
   );
-
+  const [calendarDate, setCalendarDate] = useState<Dayjs | null>(dayjs());
   const childRef = useRef<EditorHandle>(null);
   const calendarRef = useRef<FullCalendar>(null);
 
@@ -65,6 +65,12 @@ const Calendar = () => {
       dispatch(fetchEvents(user?.uid || ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      calendarRef.current.getApi().getDate();
+    }
   }, []);
 
   const handleContextMenu = (event: React.MouseEvent) => {
@@ -218,6 +224,7 @@ const Calendar = () => {
     if (calendarRef.current) {
       const calendarApi = calendarRef.current.getApi();
       calendarApi.gotoDate(dayjs(date).format("YYYY-MM-DD"));
+      setCalendarDate(dayjs(date));
     }
   };
 
@@ -252,8 +259,17 @@ const Calendar = () => {
         <Box mb={4} px={4} width="100%">
           <FullCalendar
             ref={calendarRef}
+            customButtons={{
+              todayBtn: {
+                text: "Today",
+                click: () => {
+                  calendarRef.current?.getApi().today();
+                  setCalendarDate(dayjs());
+                },
+              },
+            }}
             headerToolbar={{
-              left: "today,prev,next",
+              left: "todayBtn,prev,next",
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
@@ -325,7 +341,7 @@ const Calendar = () => {
         </Box>
         <Box pr={4} height={1030}>
           <UserInfo />
-          <DateCalendar onChange={handleDateChange} />
+          <DateCalendar value={calendarDate} onChange={handleDateChange} />
           <Divider />
           <Pomodoro />
         </Box>
