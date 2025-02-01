@@ -20,9 +20,9 @@ const initialState: PomodoroState = {
   timeLeft: 25 * 60, // 25 minutes in seconds
   mode: "focus",
   workDuration: 25 * 60,
-  breakDuration: 6 * 60,
+  breakDuration: 5 * 60,
   longBreakDuration: 30 * 60,
-  sessionsBeforeLongBreak: 4,
+  sessionsBeforeLongBreak: 6,
   completedSessions: 0,
   totalIntervals: 12,
 };
