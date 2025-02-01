@@ -99,7 +99,34 @@ const UserInfo = () => {
               color: "text.secondary",
             }}
           >
-            <ArrowCircleDownIcon color="primary" />
+            <Box
+              sx={{
+                color: "primary.main",
+                "&::after": {
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "24px",
+                  height: "24px",
+                  borderRadius: "50%",
+                  animation: "ripple 1.2s infinite ease-in-out",
+                  border: "2px solid currentColor",
+                  content: '""',
+                },
+                "@keyframes ripple": {
+                  "0%": {
+                    transform: "scale(.8)",
+                    opacity: 1,
+                  },
+                  "100%": {
+                    transform: "scale(1.3)",
+                    opacity: 0,
+                  },
+                },
+              }}
+            >
+              <ArrowCircleDownIcon color="primary" />
+            </Box>
           </IconButton>
         </Tooltip>
       </Box>
