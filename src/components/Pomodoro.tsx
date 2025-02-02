@@ -148,8 +148,7 @@ const Pomodoro = () => {
       <Typography variant="h6" pb={1}>
         {mode === "longBreak"
           ? "Long Break"
-          : mode.charAt(0).toUpperCase() + mode.slice(1)}
-        Time
+          : `${mode.charAt(0).toUpperCase() + mode.slice(1)} Time`}
       </Typography>
       <Box position="relative" display="inline-flex">
         <CircularProgress
