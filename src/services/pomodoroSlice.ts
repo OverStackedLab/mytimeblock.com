@@ -22,9 +22,9 @@ const initialState: PomodoroState = {
   workDuration: 25 * 60,
   breakDuration: 5 * 60,
   longBreakDuration: 30 * 60,
-  sessionsBeforeLongBreak: 6,
+  sessionsBeforeLongBreak: 8,
   completedSessions: 0,
-  totalIntervals: 12,
+  totalIntervals: 16,
 };
 
 const pomodoroSlice = createSlice({
