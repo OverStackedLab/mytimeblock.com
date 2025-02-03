@@ -225,14 +225,14 @@ const EventEditor = forwardRef(
                   name="eventStartTime"
                   control={formContext.control}
                   render={({ field }) => (
-                    <TimePicker {...field} label="Start Time" />
+                    <TimePicker {...field} label="Start Time" minutesStep={5} />
                   )}
                 />
                 <Controller
                   name="eventEndTime"
                   control={formContext.control}
                   render={({ field }) => (
-                    <TimePicker {...field} label="End Time" />
+                    <TimePicker {...field} label="End Time" minutesStep={5} />
                   )}
                 />
               </Stack>
