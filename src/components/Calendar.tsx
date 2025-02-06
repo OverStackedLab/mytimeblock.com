@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, {
   EventResizeDoneArg,
 } from "@fullcalendar/interaction";
-import { generateId } from "../utils/createEventId";
+import { v4 as uuidv4 } from "uuid";
 import {
   DateSelectArg,
   EventAddArg,
@@ -99,7 +99,7 @@ const Calendar = () => {
 
     if (title) {
       calendarApi.addEvent({
-        id: generateId(),
+        id: uuidv4(),
         title,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
@@ -145,11 +145,9 @@ const Calendar = () => {
 
     const duplicatedEvent = {
       ...event,
-      id: generateId(),
-      start: dayjs(event.start)
-        .add(30, "minute")
-        .format("YYYY-MM-DDTHH:mm:ssZ"),
-      end: dayjs(event.end).add(30, "minute").format("YYYY-MM-DDTHH:mm:ssZ"),
+      id: uuidv4(),
+      start: dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ"),
+      end: dayjs(event.end).add(1, "hour").format("YYYY-MM-DDTHH:mm:ssZ"),
     };
 
     dispatch(

@@ -13,8 +13,7 @@ import { TextareaAutosize } from "@mui/base/TextareaAutosize";
 import { orange } from "@mui/material/colors";
 import ColorPicker from "./ColorPicker";
 import { CalendarEvent } from "@/@types/Events";
-
-const generateId = () => (Math.floor(Math.random() * 10000) + 1).toString();
+import { v4 as uuidv4 } from "uuid";
 
 export type EditorHandle = {
   focusField: (field: string) => void;
@@ -71,7 +70,7 @@ const EventEditor = forwardRef(
         formContext.setValue("eventDate", dayjs(event.start));
         formContext.setValue("eventStartTime", dayjs(event.start));
         formContext.setValue("eventEndTime", dayjs(event.end));
-        formContext.setValue("eventId", event?.id || generateId());
+        formContext.setValue("eventId", event?.id || uuidv4());
         formContext.setValue(
           "eventDescription",
           event?.extendedProps?.description || ""
