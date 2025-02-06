@@ -147,9 +147,9 @@ const Calendar = () => {
       ...event,
       id: uuidv4(),
       start: dayjs(event.end).format("YYYY-MM-DDTHH:mm:ssZ"),
-      end: dayjs(event.end).add(1, "hour").format("YYYY-MM-DDTHH:mm:ssZ"),
+      end: dayjs(event.end).add(30, "minute").format("YYYY-MM-DDTHH:mm:ssZ"),
     };
-
+    setSelectedEvent(null);
     dispatch(
       addEventToFirebase({
         event: duplicatedEvent,
@@ -177,7 +177,7 @@ const Calendar = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const event = clickInfo.event.toPlainObject() as CalendarEvent;
-    setSelectedEvent(event);
+    // setSelectedEvent(event);
     childRef.current?.setEventFormValues(event);
     setIsSidebarOpen(true);
   };
@@ -296,7 +296,11 @@ const Calendar = () => {
                     clientX: event.clientX,
                     clientY: event.clientY,
                   } as React.MouseEvent);
-                  setSelectedEvent(info.event.toPlainObject() as CalendarEvent);
+
+                  const calendarApi = calendarRef.current?.getApi();
+                  const eventById = calendarApi?.getEventById(info.event.id);
+
+                  setSelectedEvent(eventById?.toPlainObject() as CalendarEvent);
 
                   return false;
                 },
