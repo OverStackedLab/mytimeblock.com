@@ -1,4 +1,17 @@
-# React + TypeScript + Vite
+# mytimeblock.com
+
+A modern calendar application built with React, TypeScript, Material-UI and firebase that helps users efficiently manage their time and schedule events. Features include:
+
+- Interactive calendar views (month, week, day)
+- Drag-and-drop event management
+- Custom color picker for event categorization
+- Real-time updates and persistence
+- Responsive design for all devices
+- Firebase authentication and data storage
+
+Try it live at [mytimeblock.com](https://mytimeblock.com)
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
