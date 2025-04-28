@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSlector";
 import { useSnackbar } from "notistack";
@@ -24,10 +24,13 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import NotificationSound from "../assets/microwave-timer.mp3";
 
 const Pomodoro = () => {
   const dispatch = useAppDispatch();
   const { enqueueSnackbar } = useSnackbar();
+  const audioPlayer = useRef<HTMLAudioElement>(null);
+
   const {
     isRunning,
     timeLeft,
@@ -56,6 +59,7 @@ const Pomodoro = () => {
             horizontal: "right",
           },
         });
+        playAudio();
       } else if (mode === "break" || mode === "longBreak") {
         enqueueSnackbar("Break time over! Let's focus again.", {
           autoHideDuration: 3000,
@@ -64,6 +68,7 @@ const Pomodoro = () => {
             horizontal: "right",
           },
         });
+        playAudio();
       }
 
       dispatch(switchMode());
@@ -134,6 +139,12 @@ const Pomodoro = () => {
       dispatch(updateSettings({ totalIntervals: value }));
     } else {
       dispatch(updateSettings({ totalIntervals: 0 }));
+    }
+  };
+
+  const playAudio = () => {
+    if (audioPlayer.current) {
+      audioPlayer.current.play();
     }
   };
 
@@ -279,6 +290,7 @@ const Pomodoro = () => {
           Default
         </Button>
       </Stack>
+      <audio ref={audioPlayer} src={NotificationSound} />
     </Box>
   );
 };
