@@ -227,8 +227,8 @@ const Calendar = () => {
   };
 
   const alertMessage = isTouchDevice
-    ? "Touch and hold a time slot to start creating events!"
-    : "Click or drag on a time slot to start creating events!";
+    ? "Touch and hold a time slot to start creating blocks!"
+    : "Click or drag on a time slot to start creating blocks!";
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
