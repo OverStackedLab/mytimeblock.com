@@ -265,6 +265,7 @@ const Calendar = () => {
             editable={true}
             selectable={true}
             nowIndicator={true}
+            unselectAuto={true}
             events={events}
             eventClick={handleEventClick}
             eventDidMount={(info) => {
