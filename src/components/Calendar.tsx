@@ -6,12 +6,7 @@ import interactionPlugin, {
   EventResizeDoneArg,
 } from "@fullcalendar/interaction";
 import { v4 as uuidv4 } from "uuid";
-import {
-  DateSelectArg,
-  EventAddArg,
-  EventClickArg,
-  EventDropArg,
-} from "@fullcalendar/core";
+import { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
 import { Alert, IconButton, Box, Collapse, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAppSelector } from "../hooks/useAppSlector";
@@ -60,8 +55,10 @@ const Calendar = () => {
   const childRef = useRef<EditorHandle>(null);
   const calendarRef = useRef<FullCalendar>(null);
 
+  const isAdmin = user?.email === adminEmail;
+
   useEffect(() => {
-    if (user?.uid && user?.email === adminEmail) {
+    if (isAdmin) {
       dispatch(fetchEvents(user?.uid || ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -92,13 +89,13 @@ const Calendar = () => {
   };
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    const title = "New block";
-    const calendarApi = selectInfo.view.calendar;
+    const startTime = dayjs(selectInfo.startStr);
+    const endTime = dayjs(selectInfo.endStr);
+    const diffInMinutes = endTime.diff(startTime, "minute");
 
-    calendarApi.unselect(); // clear date selection
-
-    if (title) {
-      calendarApi.addEvent({
+    if (selectInfo.jsEvent?.detail === 2 || diffInMinutes > 30) {
+      const title = "New block";
+      const newEvent = {
         id: uuidv4(),
         title,
         start: selectInfo.startStr,
@@ -108,22 +105,14 @@ const Calendar = () => {
         extendedProps: {
           description: "",
         },
-      });
-    }
-  };
+      } as CalendarEvent;
 
-  const handleEventAdd = (arg: EventAddArg) => {
-    if (!user) {
-      return;
+      if (title) {
+        dispatch(
+          addEventToFirebase({ event: newEvent, userId: user?.uid || "" })
+        );
+      }
     }
-    const newEvent = {
-      ...arg.event.toPlainObject(),
-      backgroundColor: orange[700],
-      extendedProps: {
-        description: "",
-      },
-    } as CalendarEvent;
-    dispatch(addEventToFirebase({ event: newEvent, userId: user?.uid || "" }));
   };
 
   const handleDeleteEvent = (event: CalendarEvent) => {
@@ -177,12 +166,11 @@ const Calendar = () => {
 
   const handleEventClick = (clickInfo: EventClickArg) => {
     const event = clickInfo.event.toPlainObject() as CalendarEvent;
-    // setSelectedEvent(event);
     childRef.current?.setEventFormValues(event);
     setIsSidebarOpen(true);
   };
 
-  const handleEventDrop = (info: EventDropArg) => {
+  const handleEventResize = (info: EventResizeDoneArg) => {
     if (!user) {
       return;
     }
@@ -200,7 +188,7 @@ const Calendar = () => {
     );
   };
 
-  const handleEventResize = (info: EventResizeDoneArg) => {
+  const handleEventDrop = (info: EventDropArg) => {
     if (!user) {
       return;
     }
@@ -228,7 +216,7 @@ const Calendar = () => {
 
   const alertMessage = isTouchDevice
     ? "Touch and hold a time slot to start creating blocks!"
-    : "Click or drag on a time slot to start creating blocks!";
+    : "Double click or drag on a time slot to start creating blocks!";
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -276,14 +264,9 @@ const Calendar = () => {
             initialView="timeGridWeek"
             editable={true}
             selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
             nowIndicator={true}
             events={events}
-            eventAdd={handleEventAdd}
             eventClick={handleEventClick}
-            eventDrop={handleEventDrop}
-            eventResize={handleEventResize}
             eventDidMount={(info) => {
               info.el.addEventListener(
                 "contextmenu",
@@ -308,6 +291,8 @@ const Calendar = () => {
               );
             }}
             select={handleDateSelect}
+            eventResize={handleEventResize}
+            eventDrop={handleEventDrop}
           />
           <Menu
             open={contextMenu !== null}

@@ -97,7 +97,6 @@ export const addEventToFirebase = createAsyncThunk(
     }
 
     const docRef = doc(db, "events", userId);
-    console.log("🚀 ~ event:", event);
     await updateDoc(docRef, {
       events: arrayUnion(event),
     });
