@@ -127,6 +127,7 @@ const SignUp = () => {
                 autoFocus
                 value={formData.email}
                 onChange={handleChange}
+                autoCapitalize="none"
               />
               <TextField
                 margin="normal"
