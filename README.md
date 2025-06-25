@@ -9,6 +9,10 @@ A modern calendar application built with React, TypeScript, Material-UI and fire
 - Responsive design for all devices
 - Firebase authentication and data storage
 
+<p>
+  <img src="demo/mytimeblock.com_dashboard.png" width="800"/>
+</p>
+
 Try it live at [mytimeblock.com](https://mytimeblock.com)
 
 ## React + TypeScript + Vite
