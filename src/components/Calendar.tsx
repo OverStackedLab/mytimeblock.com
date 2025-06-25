@@ -1,39 +1,39 @@
-import { useState, useRef, useEffect, useContext } from "react";
-import FullCalendar from "@fullcalendar/react";
+import { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin, {
   EventResizeDoneArg,
 } from "@fullcalendar/interaction";
-import { v4 as uuidv4 } from "uuid";
-import { DateSelectArg, EventClickArg, EventDropArg } from "@fullcalendar/core";
-import { Alert, IconButton, Box, Collapse, Divider } from "@mui/material";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import CloseIcon from "@mui/icons-material/Close";
-import { useAppSelector } from "../hooks/useAppSlector";
-import {
-  addEventToFirebase,
-  updateEventInFirebase,
-  deleteEventFromFirebase,
-  fetchEvents,
-  calendar,
-} from "../services/calendarSlice";
-import { useAppDispatch } from "../hooks/useAppDispatch";
+import { Alert, Box, Collapse, Divider, IconButton } from "@mui/material";
+import { orange } from "@mui/material/colors";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import SideBar from "./SideBar";
-import EventEditor, { EditorHandle } from "./EventEditor";
-import { CalendarEvent } from "../@types/Events";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Context } from "../context/AuthContext";
-import dayjs, { Dayjs } from "dayjs";
-import { orange } from "@mui/material/colors";
-import Pomodoro from "./Pomodoro";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import dayjs, { Dayjs } from "dayjs";
+import { useContext, useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { CalendarEvent } from "../@types/Events";
+import { Context } from "../context/AuthContext";
+import { useAppDispatch } from "../hooks/useAppDispatch";
+import { useAppSelector } from "../hooks/useAppSlector";
 import useIsTouchDevice from "../hooks/useIsTouchDevice";
+import {
+  addEventToFirebase,
+  calendar,
+  deleteEventFromFirebase,
+  fetchEvents,
+  updateEventInFirebase,
+} from "../services/calendarSlice";
+import EventEditor, { EditorHandle } from "./EventEditor";
+import Pomodoro from "./Pomodoro";
+import SideBar from "./SideBar";
 import UserInfo from "./UserInfo";
 
-const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 type ContextMenuType = {
   mouseX: number;
@@ -55,7 +55,7 @@ const Calendar = () => {
   const childRef = useRef<EditorHandle>(null);
   const calendarRef = useRef<FullCalendar>(null);
 
-  const isAdmin = user?.email === adminEmail;
+  const isAdmin = adminEmails.includes(user?.email || "");
 
   useEffect(() => {
     if (isAdmin) {

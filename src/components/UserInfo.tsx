@@ -1,14 +1,15 @@
-import { Box, IconButton, Avatar, Typography, Tooltip } from "@mui/material";
+import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
+import { Avatar, Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { doc, getDoc } from "firebase/firestore";
 import { useContext } from "react";
-import { Context } from "../context/AuthContext";
-import { calendar, migrateEvents } from "../services/calendarSlice";
-import { setEvents } from "../services/calendarSlice";
 import { CalendarEvent } from "../@types/Events";
+import { Context } from "../context/AuthContext";
+import { db } from "../firebase/config";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSlector";
-import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { calendar, migrateEvents, setEvents } from "../services/calendarSlice";
+
+const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 const UserInfo = () => {
   const { user } = useContext(Context);
@@ -25,21 +26,7 @@ const UserInfo = () => {
         <Tooltip title="Click to migrate your timeblocks to the new calendar">
           <IconButton
             onClick={async () => {
-              // localStorage.setItem(
-              //   "events",
-              //   JSON.stringify([
-              //     {
-              //       start: "2025-01-30T08:30:00.000Z",
-              //       end: "2025-01-30T09:00:00.000Z",
-              //       title: "New Event",
-              //       id: "5518",
-              //       allDay: false,
-              //     },
-              //   ])
-              // );
-              const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
-
-              if (user?.email === adminEmail) {
+              if (adminEmails.includes(user?.email || "")) {
                 const userEventsRef = doc(db, "userEvents", user?.uid || "");
                 const userEventsSnap = await getDoc(userEventsRef);
 
@@ -87,7 +74,6 @@ const UserInfo = () => {
                     userId: user?.uid || "",
                   })
                 );
-                // localStorage.removeItem("events");
               }
             }}
             sx={{

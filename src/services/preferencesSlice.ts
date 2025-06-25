@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { getAuth } from "firebase/auth";
 import { RootState } from "../store/store";
 
 type PreferencesState = {
@@ -9,6 +9,8 @@ type PreferencesState = {
   loading: boolean;
   error: string | null;
 };
+
+const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 const initialState: PreferencesState = {
   eventSwatches: [], // Default orange
@@ -20,7 +22,7 @@ export const fetchPreferences = createAsyncThunk(
   "preferences/fetch",
   async (userId: string) => {
     const user = getAuth().currentUser;
-    if (user?.email === import.meta.env.VITE_FIREBASE_ADMIN_EMAIL) {
+    if (adminEmails.includes(user?.email || "")) {
       const docRef = doc(db, "preferences", userId);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -42,7 +44,7 @@ export const updatePreferences = createAsyncThunk(
     userId: string;
   }) => {
     const user = getAuth().currentUser;
-    if (user?.email === import.meta.env.VITE_FIREBASE_ADMIN_EMAIL) {
+    if (adminEmails.includes(user?.email || "")) {
       const docRef = doc(db, "preferences", userId);
       await setDoc(docRef, preferences, { merge: true });
     }

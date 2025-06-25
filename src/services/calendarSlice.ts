@@ -1,19 +1,19 @@
-import { CalendarEvent, CalendarState, EventInfo } from "../@types/Events";
-import { RootState } from "../store/store";
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { db } from "../firebase/config";
+import { orange } from "@mui/material/colors";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { getAuth } from "firebase/auth";
 import {
+  arrayUnion,
   doc,
   getDoc,
   setDoc,
-  arrayUnion,
-  updateDoc,
   Timestamp,
+  updateDoc,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { orange } from "@mui/material/colors";
+import { CalendarEvent, CalendarState, EventInfo } from "../@types/Events";
+import { db } from "../firebase/config";
+import { RootState } from "../store/store";
 
-const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 const auth = getAuth();
 
@@ -56,7 +56,7 @@ export const fetchEvents = createAsyncThunk(
       throw new Error("User not found");
     }
 
-    if (user?.email === adminEmail) {
+    if (adminEmails.includes(user?.email || "")) {
       // Only fetch events if user is admin
       const docRef = doc(db, "events", userId);
       const docSnap = await getDoc(docRef);
@@ -78,7 +78,7 @@ export const setEvents = createAsyncThunk(
   "events/setEvents",
   async ({ events, userId }: { events: CalendarEvent[]; userId: string }) => {
     const user = auth.currentUser;
-    if (!user?.email || user.email !== adminEmail) {
+    if (!user?.email || !adminEmails.includes(user.email)) {
       return events;
     }
 
@@ -92,7 +92,7 @@ export const addEventToFirebase = createAsyncThunk(
   "events/addEventToFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
     const user = auth.currentUser;
-    if (!user?.email || user.email !== adminEmail) {
+    if (!user?.email || !adminEmails.includes(user.email)) {
       return event;
     }
 
@@ -108,7 +108,7 @@ export const updateEventInFirebase = createAsyncThunk(
   "events/updateEventInFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
     const user = auth.currentUser;
-    if (!user?.email || user.email !== adminEmail) {
+    if (!user?.email || !adminEmails.includes(user.email)) {
       return event;
     }
 
@@ -136,7 +136,7 @@ export const deleteEventFromFirebase = createAsyncThunk(
   "events/deleteEventFromFirebase",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
     const user = auth.currentUser;
-    if (!user?.email || user.email !== adminEmail) {
+    if (!user?.email || !adminEmails.includes(user.email)) {
       return event;
     }
     const docRef = doc(db, "events", userId);
@@ -181,7 +181,7 @@ const calendarSlice = createSlice({
         state.error = null;
         state.events = action.payload;
         const user = auth.currentUser;
-        if (user?.email === adminEmail) {
+        if (adminEmails.includes(user?.email || "")) {
           state.events = action.payload;
         }
       })

@@ -1,10 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Radio, RadioGroup, Box, Popover, ButtonBase } from "@mui/material";
-import CircleIcon from "@mui/icons-material/Circle";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
 import CheckBoxRoundedIcon from "@mui/icons-material/CheckBoxRounded";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CircleIcon from "@mui/icons-material/Circle";
+import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
+import { Box, ButtonBase, Popover, Radio, RadioGroup } from "@mui/material";
 import {
   blue,
   blueGrey,
@@ -24,16 +23,17 @@ import {
   teal,
   yellow,
 } from "@mui/material/colors";
-import { Controller, Control } from "react-hook-form";
-import type { FormValues } from "./EventEditor";
+import React, { useContext, useEffect, useState } from "react";
+import { Control, Controller } from "react-hook-form";
+import { Context } from "../context/AuthContext";
+import { useAppDispatch } from "../hooks/useAppDispatch";
+import { useAppSelector } from "../hooks/useAppSlector";
 import {
+  fetchPreferences,
   selectPreferences,
   updatePreferences,
-  fetchPreferences,
 } from "../services/preferencesSlice";
-import { useAppSelector } from "../hooks/useAppSlector";
-import { useAppDispatch } from "../hooks/useAppDispatch";
-import { Context } from "../context/AuthContext";
+import type { FormValues } from "./EventEditor";
 
 type ColorPickerProps = {
   value?: string;
@@ -65,7 +65,7 @@ const optionalColors = [
   lime[500],
 ];
 
-const adminEmail = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL;
+const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 const ColorPicker = ({
   value = orange[700],
@@ -82,7 +82,7 @@ const ColorPicker = ({
   });
 
   useEffect(() => {
-    if (user?.uid && user?.email === adminEmail) {
+    if (user?.uid && adminEmails.includes(user?.email || "")) {
       dispatch(fetchPreferences(user?.uid));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
