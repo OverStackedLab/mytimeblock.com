@@ -50,14 +50,14 @@ const defaultColors = [
   blue[500],
   purple[400],
   grey[500],
-];
-
-const optionalColors = [
   brown[600],
   pink[500],
   deepOrange[700],
   deepPurple[500],
   blueGrey[500],
+];
+
+const optionalColors = [
   indigo[500],
   cyan[500],
   teal[500],
