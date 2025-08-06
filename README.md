@@ -79,7 +79,7 @@ or
 ```
 $ yarn
 
-$npx vite
+$ npx vite
 
 {
   "scripts": {

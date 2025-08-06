@@ -5,6 +5,7 @@ import { useColorScheme } from "@mui/material/styles";
 import SignUp from "./routes/SignUp";
 import Login from "./routes/Login";
 import Dashboard from "./components/Dashboard";
+import Clockwise from "./components/Clockwise";
 import Protected from "./routes/Protected";
 import AuthContext from "./context/AuthContext";
 import Reset from "./routes/Reset";
@@ -41,6 +42,14 @@ function App() {
                     element={
                       <Protected>
                         <Dashboard />
+                      </Protected>
+                    }
+                  />
+                  <Route
+                    path="/clockwise"
+                    element={
+                      <Protected>
+                        <Clockwise />
                       </Protected>
                     }
                   />

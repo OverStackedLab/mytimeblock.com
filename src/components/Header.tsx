@@ -1,17 +1,19 @@
-import { useColorScheme } from "@mui/material/styles";
+import PublicIcon from "@mui/icons-material/Public";
+import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import IconButton from "@mui/material/IconButton";
+import { useColorScheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Checkbox from "@mui/material/Checkbox";
-import Button from "@mui/material/Button";
-import WbSunnyIcon from "@mui/icons-material/WbSunny";
-import timeblock from "../assets/timeblock.png";
-import { useNavigate, useLocation } from "react-router";
-import { Context } from "../context/AuthContext";
 import { useContext } from "react";
-import { logoutUser } from "../services/authSlice";
+import { useLocation, useNavigate } from "react-router";
+import timeblock from "../assets/timeblock.png";
+import { Context } from "../context/AuthContext";
 import { useAppDispatch } from "../hooks/useAppDispatch";
+import { logoutUser } from "../services/authSlice";
 
 const Header = () => {
   const { mode, setMode } = useColorScheme();
@@ -29,7 +31,7 @@ const Header = () => {
   };
 
   const isProtectedRoute = () => {
-    return ["/dashboard"].includes(location.pathname);
+    return ["/dashboard", "/clockwise"].includes(location.pathname);
   };
 
   if (!mode) {
@@ -58,10 +60,19 @@ const Header = () => {
               style={{ objectFit: "contain" }}
               alt="TimeBlock Logo"
             />
-            <Typography variant="h6">My TimeBlock</Typography>
+            <Typography variant="h6">MyTimeBlock</Typography>
           </Box>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
+          {user && isProtectedRoute() && (
+            <IconButton
+              color="inherit"
+              onClick={() => navigate("/clockwise")}
+              size="small"
+            >
+              <PublicIcon />
+            </IconButton>
+          )}
           <Checkbox
             icon={<WbSunnyIcon />}
             checkedIcon={<WbSunnyIcon />}
