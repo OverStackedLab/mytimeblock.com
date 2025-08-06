@@ -31,7 +31,7 @@ const Header = () => {
   };
 
   const isProtectedRoute = () => {
-    return ["/dashboard", "/clockwise"].includes(location.pathname);
+    return ["/dashboard"].includes(location.pathname);
   };
 
   if (!mode) {
@@ -64,15 +64,13 @@ const Header = () => {
           </Box>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
-          {user && isProtectedRoute() && (
-            <IconButton
-              color="inherit"
-              onClick={() => navigate("/clockwise")}
-              size="small"
-            >
-              <PublicIcon />
-            </IconButton>
-          )}
+          <IconButton
+            color="inherit"
+            onClick={() => navigate("/clockwise")}
+            size="small"
+          >
+            <PublicIcon />
+          </IconButton>
           <Checkbox
             icon={<WbSunnyIcon />}
             checkedIcon={<WbSunnyIcon />}
