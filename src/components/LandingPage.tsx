@@ -169,25 +169,7 @@ const LandingPage = () => {
                   }}
                 >
                   {user ? "Go to Dashboard" : "Get Started Free"}
-                </Button>
-                {/* <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => navigate("/clockwise")}
-                  sx={{
-                    color: grey[50],
-                    borderColor: grey[50],
-                    px: 4,
-                    py: 1.5,
-                    fontSize: "1.1rem",
-                    "&:hover": {
-                      borderColor: grey[100],
-                      bgcolor: alpha(grey[100], 0.1),
-                    },
-                  }}
-                >
-                  Explore Clockwise
-                </Button> */}
+                </Button>{" "}
               </Stack>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>

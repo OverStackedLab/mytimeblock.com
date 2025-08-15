@@ -6,7 +6,6 @@ import { Provider } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { PersistGate } from "redux-persist/integration/react";
 import "./App.css";
-import Clockwise from "./components/Clockwise";
 import Dashboard from "./components/Dashboard";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
@@ -47,7 +46,6 @@ function App() {
                       </Protected>
                     }
                   />
-                  <Route path="/clockwise" element={<Clockwise />} />
                 </Routes>
                 <Footer />
               </Box>
