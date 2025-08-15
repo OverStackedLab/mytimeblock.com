@@ -1,22 +1,23 @@
-import { useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Button,
-  TextField,
-  Typography,
   Container,
-  Alert,
-  Paper,
-  Link,
   IconButton,
   InputAdornment,
+  Link,
+  Paper,
+  TextField,
+  Typography,
 } from "@mui/material";
+import { grey } from "@mui/material/colors";
+import { useColorScheme } from "@mui/material/styles";
+import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router";
 import Header from "../components/Header";
-import { useColorScheme } from "@mui/material/styles";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { loginUser } from "../services/authSlice";
 import { useAppDispatch } from "../hooks/useAppDispatch";
+import { loginUser } from "../services/authSlice";
 
 type LoginFormData = {
   email: string;
@@ -148,7 +149,7 @@ const Login = () => {
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                sx={{ mt: 3, mb: 2, color: grey[50] }}
               >
                 Sign In
               </Button>

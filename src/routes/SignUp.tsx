@@ -1,23 +1,24 @@
-import { useState } from "react";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Button,
-  TextField,
-  Typography,
   Container,
-  Alert,
-  Paper,
   IconButton,
   InputAdornment,
+  Paper,
+  TextField,
+  Typography,
 } from "@mui/material";
+import { grey } from "@mui/material/colors";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import { auth } from "../firebase/config";
-import Header from "../components/Header";
+import { useState } from "react";
 import { Link } from "react-router";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import Header from "../components/Header";
+import { auth } from "../firebase/config";
 
 interface SignUpFormData {
   email: string;
@@ -190,7 +191,7 @@ const SignUp = () => {
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                sx={{ mt: 3, mb: 2, color: grey[50] }}
               >
                 Sign Up
               </Button>

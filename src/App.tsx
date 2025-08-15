@@ -9,6 +9,7 @@ import "./App.css";
 import Clockwise from "./components/Clockwise";
 import Dashboard from "./components/Dashboard";
 import Footer from "./components/Footer";
+import LandingPage from "./components/LandingPage";
 import AuthContext from "./context/AuthContext";
 import Login from "./routes/Login";
 import Protected from "./routes/Protected";
@@ -34,7 +35,8 @@ function App() {
             <BrowserRouter>
               <Box className={mode} sx={{ pb: 7 }}>
                 <Routes>
-                  <Route path="/" element={<Login />} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/reset" element={<Reset />} />
                   <Route

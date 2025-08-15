@@ -1,10 +1,9 @@
-import PublicIcon from "@mui/icons-material/Public";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
+import { grey } from "@mui/material/colors";
 import { useColorScheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -24,7 +23,7 @@ const Header = () => {
   const handleSignOut = async () => {
     try {
       await dispatch(logoutUser());
-      navigate("/signup");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -64,13 +63,25 @@ const Header = () => {
           </Box>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
-          <IconButton
-            color="inherit"
-            onClick={() => navigate("/clockwise")}
-            size="small"
-          >
-            <PublicIcon />
-          </IconButton>
+          {!user && !isProtectedRoute() && (
+            <>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/login")}
+                size="small"
+              >
+                Login
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => navigate("/signup")}
+                size="small"
+                sx={{ ml: 1, color: grey[50] }}
+              >
+                Sign Up
+              </Button>
+            </>
+          )}
           <Checkbox
             icon={<WbSunnyIcon />}
             checkedIcon={<WbSunnyIcon />}
