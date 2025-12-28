@@ -1,7 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getAuth } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { supabase } from "../supabase/config";
 import { RootState } from "../store/store";
 
 type PreferencesState = {
@@ -10,10 +8,8 @@ type PreferencesState = {
   error: string | null;
 };
 
-const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
-
 const initialState: PreferencesState = {
-  eventSwatches: [], // Default orange
+  eventSwatches: [],
   loading: false,
   error: null,
 };
@@ -21,16 +17,20 @@ const initialState: PreferencesState = {
 export const fetchPreferences = createAsyncThunk(
   "preferences/fetch",
   async (userId: string) => {
-    const user = getAuth().currentUser;
-    if (adminEmails.includes(user?.email || "")) {
-      const docRef = doc(db, "preferences", userId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        return docSnap.data();
-      }
-      await setDoc(docRef, initialState, { merge: true });
+    const { data, error } = await supabase
+      .from("preferences")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    // PGRST116 = row not found, which is ok for new users
+    if (error && error.code !== "PGRST116") {
+      throw error;
     }
-    return initialState;
+
+    return {
+      eventSwatches: data?.event_swatches || [],
+    };
   }
 );
 
@@ -43,11 +43,12 @@ export const updatePreferences = createAsyncThunk(
     preferences: Partial<PreferencesState>;
     userId: string;
   }) => {
-    const user = getAuth().currentUser;
-    if (adminEmails.includes(user?.email || "")) {
-      const docRef = doc(db, "preferences", userId);
-      await setDoc(docRef, preferences, { merge: true });
-    }
+    const { error } = await supabase.from("preferences").upsert({
+      user_id: userId,
+      event_swatches: preferences.eventSwatches || [],
+    });
+
+    if (error) throw error;
     return preferences;
   }
 );

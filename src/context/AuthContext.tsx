@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, type ReactNode } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { supabase } from "../supabase/config";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { initializeAuth } from "../services/authSlice";
 
@@ -10,6 +10,7 @@ type User = {
   photoURL: string | null | undefined;
   emailVerified: boolean | undefined;
   isAnonymous: boolean | undefined;
+  isAdmin: boolean;
 };
 
 type AuthContextType = {
@@ -27,36 +28,73 @@ type AuthContextProps = {
 };
 
 const AuthContext = ({ children }: AuthContextProps) => {
-  const auth = getAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setLoading(false);
-      if (currentUser) {
+    // Get initial session
+    const getInitialSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        // Fetch profile to get is_admin status
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin, display_name, photo_url")
+          .eq("id", session.user.id)
+          .single();
+
         setUser({
-          email: currentUser.email,
-          uid: currentUser.uid,
-          displayName: currentUser.displayName,
-          photoURL: currentUser.photoURL,
-          emailVerified: currentUser.emailVerified,
-          isAnonymous: currentUser.isAnonymous,
+          email: session.user.email,
+          uid: session.user.id,
+          displayName: profile?.display_name || null,
+          photoURL: profile?.photo_url || null,
+          emailVerified: session.user.email_confirmed_at !== null,
+          isAnonymous: false,
+          isAdmin: profile?.is_admin || false,
+        });
+      }
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        // Fetch profile to get is_admin status
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin, display_name, photo_url")
+          .eq("id", session.user.id)
+          .single();
+
+        setUser({
+          email: session.user.email,
+          uid: session.user.id,
+          displayName: profile?.display_name || null,
+          photoURL: profile?.photo_url || null,
+          emailVerified: session.user.email_confirmed_at !== null,
+          isAnonymous: false,
+          isAdmin: profile?.is_admin || false,
         });
       } else {
         setUser(null);
       }
+      setLoading(false);
     });
 
     dispatch(initializeAuth());
 
     return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      subscription.unsubscribe();
     };
-  }, [auth, dispatch]);
+  }, [dispatch]);
 
   const values: AuthContextType = {
     user,

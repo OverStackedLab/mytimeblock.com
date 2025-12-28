@@ -21,19 +21,18 @@ import { Context } from "../context/AuthContext";
 import { useAppDispatch } from "../hooks/useAppDispatch";
 import { useAppSelector } from "../hooks/useAppSlector";
 import useIsTouchDevice from "../hooks/useIsTouchDevice";
+import { useRealtimeEvents } from "../hooks/useRealtimeEvents";
 import {
-  addEventToFirebase,
+  addEvent,
   calendar,
-  deleteEventFromFirebase,
+  deleteEvent,
   fetchEvents,
-  updateEventInFirebase,
+  updateEvent,
 } from "../services/calendarSlice";
 import EventEditor, { EditorHandle } from "./EventEditor";
 import Pomodoro from "./Pomodoro";
 import SideBar from "./SideBar";
 import UserInfo from "./UserInfo";
-
-const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
 
 type ContextMenuType = {
   mouseX: number;
@@ -55,14 +54,15 @@ const Calendar = () => {
   const childRef = useRef<EditorHandle>(null);
   const calendarRef = useRef<FullCalendar>(null);
 
-  const isAdmin = adminEmails.includes(user?.email || "");
+  // Enable real-time event subscriptions
+  useRealtimeEvents(user?.uid);
 
   useEffect(() => {
-    if (isAdmin) {
-      dispatch(fetchEvents(user?.uid || ""));
+    if (user?.uid) {
+      dispatch(fetchEvents(user.uid));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.uid]);
 
   useEffect(() => {
     if (calendarRef.current) {
@@ -108,9 +108,7 @@ const Calendar = () => {
       } as CalendarEvent;
 
       if (title) {
-        dispatch(
-          addEventToFirebase({ event: newEvent, userId: user?.uid || "" })
-        );
+        dispatch(addEvent({ event: newEvent, userId: user?.uid || "" }));
       }
     }
   };
@@ -120,7 +118,7 @@ const Calendar = () => {
       return;
     }
     dispatch(
-      deleteEventFromFirebase({
+      deleteEvent({
         event: event,
         userId: user?.uid || "",
       })
@@ -140,7 +138,7 @@ const Calendar = () => {
     };
     setSelectedEvent(null);
     dispatch(
-      addEventToFirebase({
+      addEvent({
         event: duplicatedEvent,
         userId: user.uid || "",
       })
@@ -153,7 +151,7 @@ const Calendar = () => {
     }
 
     dispatch(
-      updateEventInFirebase({
+      updateEvent({
         event: {
           ...event,
           start: dayjs(event.start).format("YYYY-MM-DDTHH:mm:ssZ"),
@@ -181,7 +179,7 @@ const Calendar = () => {
       },
     } as CalendarEvent;
     dispatch(
-      updateEventInFirebase({
+      updateEvent({
         event: updatedEvent,
         userId: user?.uid || "",
       })
@@ -199,7 +197,7 @@ const Calendar = () => {
       },
     } as CalendarEvent;
     dispatch(
-      updateEventInFirebase({
+      updateEvent({
         event: updatedEvent,
         userId: user?.uid || "",
       })

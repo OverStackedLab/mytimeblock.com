@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { supabase } from "../supabase/config";
 import {
   Box,
   Button,
@@ -28,7 +27,12 @@ const Reset = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login`,
+      });
+
+      if (error) throw error;
+
       setSuccess("Password reset email sent! Check your inbox.");
       setEmail("");
     } catch (error) {

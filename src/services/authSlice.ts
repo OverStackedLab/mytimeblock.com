@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { supabase } from "../supabase/config";
 import { RootState } from "../store/store";
 
 type AuthState = {
@@ -10,6 +10,7 @@ type AuthState = {
     photoURL: string | null | undefined;
     emailVerified: boolean | undefined;
     isAnonymous: boolean | undefined;
+    isAdmin: boolean;
   } | null;
   loading: boolean;
   error: string | null;
@@ -24,19 +25,28 @@ const initialState: AuthState = {
 export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ email, password }: { email: string; password: string }) => {
-    const auth = getAuth();
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
-    );
+      password,
+    });
+
+    if (error) throw error;
+
+    // Fetch profile for admin status
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin, display_name, photo_url")
+      .eq("id", data.user.id)
+      .single();
+
     return {
-      email: userCredential.user.email,
-      uid: userCredential.user.uid,
-      displayName: userCredential.user.displayName,
-      photoURL: userCredential.user.photoURL,
-      emailVerified: userCredential.user.emailVerified,
-      isAnonymous: userCredential.user.isAnonymous,
+      email: data.user.email,
+      uid: data.user.id,
+      displayName: profile?.display_name || null,
+      photoURL: profile?.photo_url || null,
+      emailVerified: data.user.email_confirmed_at !== null,
+      isAnonymous: false,
+      isAdmin: profile?.is_admin || false,
     };
   }
 );
@@ -44,27 +54,38 @@ export const loginUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { dispatch }) => {
-    const auth = getAuth();
-    await signOut(auth);
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
 
     // Reset all slices
-    dispatch(resetState()); // auth reset
-    // dispatch({ type: "calendar/resetState" });
-    // dispatch({ type: "preferences/resetState" });
-    // dispatch({ type: "pomodoro/resetState" });
+    dispatch(resetState());
   }
 );
 
 export const initializeAuth = createAsyncThunk("auth/initialize", async () => {
-  const auth = getAuth();
-  const user = auth.currentUser;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.user) {
+    return null;
+  }
+
+  // Fetch profile for admin status
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("is_admin, display_name, photo_url")
+    .eq("id", session.user.id)
+    .single();
+
   return {
-    email: user?.email,
-    uid: user?.uid,
-    displayName: user?.displayName,
-    photoURL: user?.photoURL,
-    emailVerified: user?.emailVerified,
-    isAnonymous: user?.isAnonymous,
+    email: session.user.email,
+    uid: session.user.id,
+    displayName: profile?.display_name || null,
+    photoURL: profile?.photo_url || null,
+    emailVerified: session.user.email_confirmed_at !== null,
+    isAnonymous: false,
+    isAdmin: profile?.is_admin || false,
   };
 });
 
@@ -89,6 +110,7 @@ const authSlice = createSlice({
           photoURL: action.payload.photoURL,
           emailVerified: action.payload.emailVerified,
           isAnonymous: action.payload.isAnonymous,
+          isAdmin: action.payload.isAdmin,
         };
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -99,14 +121,17 @@ const authSlice = createSlice({
         state.user = null;
       })
       .addCase(initializeAuth.fulfilled, (state, action) => {
-        state.user = {
-          email: action.payload.email,
-          uid: action?.payload?.uid || "",
-          displayName: action.payload.displayName,
-          photoURL: action.payload.photoURL,
-          emailVerified: action.payload.emailVerified,
-          isAnonymous: action.payload.isAnonymous,
-        };
+        if (action.payload) {
+          state.user = {
+            email: action.payload.email,
+            uid: action.payload.uid || "",
+            displayName: action.payload.displayName,
+            photoURL: action.payload.photoURL,
+            emailVerified: action.payload.emailVerified,
+            isAnonymous: action.payload.isAnonymous,
+            isAdmin: action.payload.isAdmin,
+          };
+        }
       });
   },
 });

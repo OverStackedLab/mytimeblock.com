@@ -11,14 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import {
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-} from "firebase/auth";
 import { useState } from "react";
 import { Link } from "react-router";
 import Header from "../components/Header";
-import { auth } from "../firebase/config";
+import { supabase } from "../supabase/config";
 
 interface SignUpFormData {
   email: string;
@@ -58,17 +54,18 @@ const SignUp = () => {
     }
 
     try {
-      await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      setSuccess("Account created successfully!");
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+
+      if (error) throw error;
+
+      setSuccess("Account created! Check your email for verification link.");
       setFormData({ email: "", password: "", confirmPassword: "" });
-      const user = auth.currentUser;
-      if (user) {
-        sendEmailVerification(user);
-      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

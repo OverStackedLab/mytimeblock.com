@@ -1,160 +1,123 @@
-import { orange } from "@mui/material/colors";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getAuth } from "firebase/auth";
-import {
-  arrayUnion,
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
-import { CalendarEvent, CalendarState, EventInfo } from "../@types/Events";
-import { db } from "../firebase/config";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CalendarEvent, CalendarState } from "../@types/Events";
+import { supabase } from "../supabase/config";
 import { RootState } from "../store/store";
+import type { Event as DbEvent } from "../supabase/types";
 
-const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL.split(",");
-
-const auth = getAuth();
-
-export const migrateEvents = (oldEvents: EventInfo[]): CalendarEvent[] => {
-  return oldEvents.map((event) => {
-    let startDate: string;
-    let endDate: string;
-
-    if (event?.start instanceof Timestamp) {
-      startDate = event.start.toDate().toISOString();
-    } else {
-      startDate = String(event.start || new Date().toISOString());
-    }
-
-    if (event?.end instanceof Timestamp) {
-      endDate = event.end.toDate().toISOString();
-    } else {
-      endDate = String(event.end || startDate);
-    }
-
-    return {
-      id: String(event.id || ""),
-      title: String(event.title || ""),
-      start: startDate,
-      end: endDate,
-      backgroundColor: String(event.color || orange[700]),
-      allDay: Boolean(event.allDay),
-      extendedProps: {
-        description: String(event.description || ""),
-      },
-    };
-  });
-};
+// Helper to map database event to CalendarEvent
+const mapDbEventToCalendarEvent = (dbEvent: DbEvent): CalendarEvent => ({
+  id: dbEvent.id,
+  title: dbEvent.title,
+  start: dbEvent.start_time,
+  end: dbEvent.end_time || undefined,
+  backgroundColor: dbEvent.background_color,
+  allDay: dbEvent.all_day,
+  extendedProps: {
+    description: dbEvent.description,
+  },
+});
 
 export const fetchEvents = createAsyncThunk(
   "events/fetchEvents",
   async (userId: string) => {
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error("User not found");
-    }
+    const { data, error } = await supabase
+      .from("events")
+      .select("*")
+      .eq("user_id", userId)
+      .order("start_time", { ascending: true });
 
-    if (adminEmails.includes(user?.email || "")) {
-      // Only fetch events if user is admin
-      const docRef = doc(db, "events", userId);
-      const docSnap = await getDoc(docRef);
+    if (error) throw error;
 
-      if (docSnap.exists()) {
-        return docSnap.data().events || [];
-      }
-
-      // Initialize empty events array for new users
-      await setDoc(docRef, { events: [] }, { merge: true });
-
-      return [];
-    }
-    return [];
+    return (data || []).map(mapDbEventToCalendarEvent);
   }
 );
 
 export const setEvents = createAsyncThunk(
   "events/setEvents",
   async ({ events, userId }: { events: CalendarEvent[]; userId: string }) => {
-    const user = auth.currentUser;
-    if (!user?.email || !adminEmails.includes(user.email)) {
-      return events;
+    // Delete all existing events for user
+    const { error: deleteError } = await supabase
+      .from("events")
+      .delete()
+      .eq("user_id", userId);
+
+    if (deleteError) throw deleteError;
+
+    // Insert all new events
+    if (events.length > 0) {
+      const dbEvents = events.map((event) => ({
+        id: event.id,
+        user_id: userId,
+        title: event.title,
+        start_time: event.start as string,
+        end_time: (event.end as string) || null,
+        all_day: event.allDay || false,
+        background_color: event.backgroundColor || "#f57c00",
+        description: event.extendedProps?.description || "",
+      }));
+
+      const { error: insertError } = await supabase
+        .from("events")
+        .insert(dbEvents);
+
+      if (insertError) throw insertError;
     }
 
-    const docRef = doc(db, "events", userId);
-    await setDoc(docRef, { events }, { merge: true });
     return events;
   }
 );
 
-export const addEventToFirebase = createAsyncThunk(
-  "events/addEventToFirebase",
+export const addEvent = createAsyncThunk(
+  "events/addEvent",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
-    const user = auth.currentUser;
-    if (!user?.email || !adminEmails.includes(user.email)) {
-      return event;
-    }
-
-    const docRef = doc(db, "events", userId);
-    await updateDoc(docRef, {
-      events: arrayUnion(event),
+    const { error } = await supabase.from("events").insert({
+      id: event.id,
+      user_id: userId,
+      title: event.title,
+      start_time: event.start as string,
+      end_time: (event.end as string) || null,
+      all_day: event.allDay || false,
+      background_color: event.backgroundColor || "#f57c00",
+      description: event.extendedProps?.description || "",
     });
+
+    if (error) throw error;
     return event;
   }
 );
 
-export const updateEventInFirebase = createAsyncThunk(
-  "events/updateEventInFirebase",
+export const updateEvent = createAsyncThunk(
+  "events/updateEvent",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
-    const user = auth.currentUser;
-    if (!user?.email || !adminEmails.includes(user.email)) {
-      return event;
-    }
+    const { error } = await supabase
+      .from("events")
+      .update({
+        title: event.title,
+        start_time: event.start as string,
+        end_time: (event.end as string) || null,
+        all_day: event.allDay || false,
+        background_color: event.backgroundColor,
+        description: event.extendedProps?.description || "",
+      })
+      .eq("id", event.id)
+      .eq("user_id", userId);
 
-    const docRef = doc(db, "events", userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const events = docSnap.data().events || [];
-
-      const index = events.findIndex((e: CalendarEvent) => e.id === event.id);
-
-      if (index !== -1) {
-        events[index] = event;
-
-        await updateDoc(docRef, { events });
-      }
-
-      return event;
-    }
-    throw new Error("Document not found");
+    if (error) throw error;
+    return event;
   }
 );
 
-export const deleteEventFromFirebase = createAsyncThunk(
-  "events/deleteEventFromFirebase",
+export const deleteEvent = createAsyncThunk(
+  "events/deleteEvent",
   async ({ event, userId }: { event: CalendarEvent; userId: string }) => {
-    const user = auth.currentUser;
-    if (!user?.email || !adminEmails.includes(user.email)) {
-      return event;
-    }
-    const docRef = doc(db, "events", userId);
-    const docSnap = await getDoc(docRef);
+    const { error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", event.id)
+      .eq("user_id", userId);
 
-    if (docSnap.exists()) {
-      const events = docSnap.data().events || [];
-
-      const index = events.findIndex((e: CalendarEvent) => e.id === event.id);
-
-      if (index !== -1) {
-        events.splice(index, 1);
-        await updateDoc(docRef, { events });
-      }
-
-      return event;
-    }
-    throw new Error("Document not found");
+    if (error) throw error;
+    return event;
   }
 );
 
@@ -169,6 +132,24 @@ const calendarSlice = createSlice({
   initialState,
   reducers: {
     resetState: () => initialState,
+    // Real-time event handlers
+    eventAdded: (state, action: PayloadAction<DbEvent>) => {
+      const event = mapDbEventToCalendarEvent(action.payload);
+      // Avoid duplicates
+      if (!state.events.find((e) => e.id === event.id)) {
+        state.events.push(event);
+      }
+    },
+    eventUpdated: (state, action: PayloadAction<DbEvent>) => {
+      const event = mapDbEventToCalendarEvent(action.payload);
+      const index = state.events.findIndex((e) => e.id === event.id);
+      if (index !== -1) {
+        state.events[index] = event;
+      }
+    },
+    eventDeleted: (state, action: PayloadAction<string>) => {
+      state.events = state.events.filter((e) => e.id !== action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -177,22 +158,20 @@ const calendarSlice = createSlice({
       })
       .addCase(fetchEvents.fulfilled, (state, action) => {
         state.loading = false;
-        // Clear any existing error state
         state.error = null;
         state.events = action.payload;
-        const user = auth.currentUser;
-        if (adminEmails.includes(user?.email || "")) {
-          state.events = action.payload;
-        }
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || null;
       })
-      .addCase(addEventToFirebase.fulfilled, (state, action) => {
-        state.events.push(action.payload);
+      .addCase(addEvent.fulfilled, (state, action) => {
+        // Only add if not already present (might be added by realtime)
+        if (!state.events.find((e) => e.id === action.payload.id)) {
+          state.events.push(action.payload);
+        }
       })
-      .addCase(updateEventInFirebase.fulfilled, (state, action) => {
+      .addCase(updateEvent.fulfilled, (state, action) => {
         if (action.payload) {
           const index = state.events.findIndex(
             (event) => event.id === action.payload.id
@@ -202,19 +181,20 @@ const calendarSlice = createSlice({
           }
         }
       })
-      .addCase(deleteEventFromFirebase.fulfilled, (state, action) => {
+      .addCase(deleteEvent.fulfilled, (state, action) => {
         state.events = state.events.filter(
           (event) => event.id !== action.payload.id
         );
       })
       .addCase(setEvents.fulfilled, (state, action) => {
         state.loading = false;
-        state.events = [...state.events, ...action.payload];
+        state.events = action.payload;
       });
   },
 });
 
-export const { resetState } = calendarSlice.actions;
+export const { resetState, eventAdded, eventUpdated, eventDeleted } =
+  calendarSlice.actions;
 
 export const calendar = (state: RootState) => state.calendar;
 export default calendarSlice.reducer;
