@@ -1,4 +1,7 @@
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
   Checkbox,
@@ -34,6 +37,8 @@ export default function TodoList() {
   const dispatch = useAppDispatch();
   const { todos, loading } = useAppSelector(selectTodos);
   const [newTodoText, setNewTodoText] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   useEffect(() => {
     if (user?.uid) {
@@ -73,6 +78,29 @@ export default function TodoList() {
     await dispatch(deleteTodo({ todoId, userId: user.uid }));
   };
 
+  const handleStartEdit = (todo: Todo) => {
+    setEditingId(todo.id);
+    setEditText(todo.text);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const handleSaveEdit = async (todo: Todo) => {
+    if (!user?.uid || !editText.trim()) return;
+
+    const updatedTodo = {
+      ...todo,
+      text: editText.trim(),
+    };
+
+    await dispatch(updateTodo({ todo: updatedTodo, userId: user.uid }));
+    setEditingId(null);
+    setEditText("");
+  };
+
   return (
     <div className="dashboard">
       <Header />
@@ -80,7 +108,7 @@ export default function TodoList() {
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h3" component="h1" gutterBottom>
-              My Tasks
+              My To Dos
             </Typography>
             <Typography variant="body1" color="text.secondary">
               Keep track of your daily tasks and stay organized
@@ -115,38 +143,102 @@ export default function TodoList() {
                   <ListItem
                     key={todo.id}
                     secondaryAction={
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => handleDeleteTodo(todo.id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      editingId === todo.id ? (
+                        <Box sx={{ display: "flex", gap: 0.5 }}>
+                          <IconButton
+                            edge="end"
+                            aria-label="save"
+                            onClick={() => handleSaveEdit(todo)}
+                            size="small"
+                          >
+                            <CheckIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            aria-label="cancel"
+                            onClick={handleCancelEdit}
+                            size="small"
+                          >
+                            <CloseIcon />
+                          </IconButton>
+                        </Box>
+                      ) : (
+                        <Box sx={{ display: "flex", gap: 0.5 }}>
+                          <IconButton
+                            edge="end"
+                            aria-label="edit"
+                            onClick={() => handleStartEdit(todo)}
+                            size="small"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => handleDeleteTodo(todo.id)}
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      )
                     }
                     disablePadding
                   >
-                    <ListItemButton
-                      onClick={() => handleToggleTodo(todo)}
-                      dense
-                    >
-                      <ListItemIcon>
-                        <Checkbox
-                          edge="start"
-                          checked={todo.completed}
-                          tabIndex={-1}
-                          disableRipple
+                    {editingId === todo.id ? (
+                      <Box sx={{ flex: 1, px: 2, py: 1 }}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveEdit(todo);
+                            } else if (e.key === "Escape") {
+                              handleCancelEdit();
+                            }
+                          }}
+                          autoFocus
                         />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={todo.text}
-                        sx={{
-                          textDecoration: todo.completed
-                            ? "line-through"
-                            : "none",
-                          color: todo.completed ? "text.secondary" : "text.primary",
-                        }}
-                      />
-                    </ListItemButton>
+                      </Box>
+                    ) : (
+                      <ListItemButton
+                        onClick={() => handleToggleTodo(todo)}
+                        dense
+                        sx={{ alignItems: "flex-start" }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 40, mt: 0.5 }}>
+                          <Checkbox
+                            edge="start"
+                            checked={todo.completed}
+                            tabIndex={-1}
+                            disableRipple
+                            sx={{ p: 0 }}
+                          />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={todo.text}
+                          secondary={`${new Date(
+                            todo.createdAt,
+                          ).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}`}
+                          sx={{
+                            textDecoration: todo.completed
+                              ? "line-through"
+                              : "none",
+                            color: todo.completed
+                              ? "text.secondary"
+                              : "text.primary",
+                          }}
+                        />
+                      </ListItemButton>
+                    )}
                   </ListItem>
                 ))}
               </List>
@@ -156,7 +248,8 @@ export default function TodoList() {
           <Box sx={{ textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">
               {todos.filter((t) => !t.completed).length} task
-              {todos.filter((t) => !t.completed).length !== 1 ? "s" : ""} remaining
+              {todos.filter((t) => !t.completed).length !== 1 ? "s" : ""}{" "}
+              remaining
             </Typography>
           </Box>
         </Container>

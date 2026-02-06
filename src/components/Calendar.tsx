@@ -46,7 +46,10 @@ const Calendar = () => {
   const dispatch = useAppDispatch();
   const [contextMenu, setContextMenu] = useState<ContextMenuType>(null);
   const { user } = useContext(Context);
-  const [alertOpen, setAlertOpen] = useState(true);
+  const [alertOpen, setAlertOpen] = useState(() => {
+    const stored = localStorage.getItem("calendarAlertClosed");
+    return stored !== "true";
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -230,6 +233,7 @@ const Calendar = () => {
                 size="small"
                 onClick={() => {
                   setAlertOpen(false);
+                  localStorage.setItem("calendarAlertClosed", "true");
                 }}
               >
                 <CloseIcon fontSize="inherit" />
@@ -259,7 +263,7 @@ const Calendar = () => {
               center: "title",
               right: "dayGridMonth,timeGridWeek,timeGridDay",
             }}
-            height={1030}
+            height="calc(100vh - 150px)"
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
             editable={true}
@@ -327,7 +331,7 @@ const Calendar = () => {
             </MenuItem>
           </Menu>
         </Box>
-        <Box pr={4} height={1030}>
+        <Box pr={4} height="calc(100vh - 150px)" sx={{ overflowY: 'auto' }}>
           <UserInfo />
           <DateCalendar value={calendarDate} onChange={handleDateChange} />
           <Divider />

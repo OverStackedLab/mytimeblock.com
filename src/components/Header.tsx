@@ -47,7 +47,7 @@ const Header = () => {
       <Toolbar>
         <Box flexGrow={1}>
           <Box
-            display="flex"
+            display="inline-flex"
             gap={1}
             onClick={() => navigate(user ? "/dashboard" : "/")}
             sx={{ cursor: "pointer" }}
