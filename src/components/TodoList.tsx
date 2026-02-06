@@ -1,9 +1,11 @@
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
+  Button,
   Checkbox,
   Container,
   IconButton,
@@ -108,7 +110,7 @@ export default function TodoList() {
         <Container maxWidth="md" sx={{ py: 4 }}>
           <Box sx={{ mb: 4 }}>
             <Typography variant="h3" component="h1" gutterBottom>
-              My To Dos
+              My ToDos
             </Typography>
             <Typography variant="body1" color="text.secondary">
               Keep track of your daily tasks and stay organized
@@ -117,14 +119,23 @@ export default function TodoList() {
 
           <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
             <form onSubmit={handleAddTodo}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Add a new task..."
-                value={newTodoText}
-                onChange={(e) => setNewTodoText(e.target.value)}
-                sx={{ mb: 2 }}
-              />
+              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Add a new todo..."
+                  value={newTodoText}
+                  onChange={(e) => setNewTodoText(e.target.value)}
+                />
+                <Button
+                  type="submit"
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  sx={{ minWidth: 200, color: "white" }}
+                >
+                  Add
+                </Button>
+              </Box>
             </form>
 
             {loading ? (
