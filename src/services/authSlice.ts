@@ -45,13 +45,27 @@ export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, { dispatch }) => {
     const auth = getAuth();
+
+    // Get current user's email before signing out
+    const currentUserEmail = auth.currentUser?.email;
+
+    // Check if user is an admin
+    const adminEmails = import.meta.env.VITE_FIREBASE_ADMIN_EMAIL?.split(",").map((email: string) => email.trim()) || [];
+    const isAdmin = currentUserEmail && adminEmails.includes(currentUserEmail);
+
     await signOut(auth);
 
-    // Reset all slices
-    dispatch(resetState()); // auth reset
-    // dispatch({ type: "calendar/resetState" });
-    // dispatch({ type: "preferences/resetState" });
-    // dispatch({ type: "pomodoro/resetState" });
+    // Always reset auth state
+    dispatch(resetState());
+
+    // For admin users, clear all persisted Redux state to prevent data leakage
+    // when switching between admin and non-admin accounts on the same device
+    if (isAdmin) {
+      dispatch({ type: "calendar/resetState" });
+      dispatch({ type: "preferences/resetState" });
+      dispatch({ type: "pomodoro/resetTimer" });
+      dispatch({ type: "todos/resetTodoState" });
+    }
   }
 );
 
