@@ -9,6 +9,7 @@ import "./App.css";
 import Dashboard from "./components/Dashboard";
 import Footer from "./components/Footer";
 import LandingPage from "./components/LandingPage";
+import TodoList from "./components/TodoList";
 import AuthContext from "./context/AuthContext";
 import Login from "./routes/Login";
 import Protected from "./routes/Protected";
@@ -43,6 +44,14 @@ function App() {
                     element={
                       <Protected>
                         <Dashboard />
+                      </Protected>
+                    }
+                  />
+                  <Route
+                    path="/todos"
+                    element={
+                      <Protected>
+                        <TodoList />
                       </Protected>
                     }
                   />

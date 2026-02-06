@@ -30,7 +30,7 @@ const Header = () => {
   };
 
   const isProtectedRoute = () => {
-    return ["/dashboard"].includes(location.pathname);
+    return ["/dashboard", "/todos"].includes(location.pathname);
   };
 
   if (!mode) {
@@ -79,6 +79,32 @@ const Header = () => {
                 sx={{ ml: 1, color: grey[50] }}
               >
                 Sign Up
+              </Button>
+            </>
+          )}
+          {user && isProtectedRoute() && (
+            <>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/dashboard")}
+                size="small"
+                sx={{
+                  color: location.pathname === "/dashboard" ? "#ff9800" : "inherit",
+                  fontWeight: location.pathname === "/dashboard" ? 600 : 400,
+                }}
+              >
+                Calendar
+              </Button>
+              <Button
+                color="inherit"
+                onClick={() => navigate("/todos")}
+                size="small"
+                sx={{
+                  color: location.pathname === "/todos" ? "#ff9800" : "inherit",
+                  fontWeight: location.pathname === "/todos" ? 600 : 400,
+                }}
+              >
+                Todos
               </Button>
             </>
           )}
