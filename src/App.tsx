@@ -12,6 +12,7 @@ import LandingPage from "./components/LandingPage";
 import TodoList from "./components/TodoList";
 import AuthContext from "./context/AuthContext";
 import Login from "./routes/Login";
+import NotFound from "./routes/NotFound";
 import Protected from "./routes/Protected";
 import Reset from "./routes/Reset";
 import SignUp from "./routes/SignUp";
@@ -55,6 +56,7 @@ function App() {
                       </Protected>
                     }
                   />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
                 <Footer />
               </Box>
