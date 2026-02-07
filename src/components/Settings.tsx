@@ -1,3 +1,4 @@
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CircleIcon from "@mui/icons-material/Circle";
 import CloseIcon from "@mui/icons-material/Close";
@@ -79,6 +80,8 @@ export default function Settings() {
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
 
+  const usedColors = new Set(categories.map((c) => c.color));
+
   useEffect(() => {
     if (user?.uid) {
       dispatch(fetchCategories(user.uid));
@@ -106,7 +109,8 @@ export default function Settings() {
     // Clear categoryId from affected events
     const affectedEvents = events.filter((e) => e.categoryId === categoryId);
     for (const event of affectedEvents) {
-      const { categoryId: _, ...eventWithoutCategory } = event;
+      const eventWithoutCategory = { ...event };
+      delete eventWithoutCategory.categoryId;
       await dispatch(
         updateEventInFirebase({
           event: eventWithoutCategory,
@@ -175,7 +179,8 @@ export default function Settings() {
                 <Button
                   type="submit"
                   variant="contained"
-                  sx={{ minWidth: 200, color: "white" }}
+                  startIcon={<AddIcon />}
+                  sx={{ minWidth: 200, color: "white", height: 56, fontSize: 16 }}
                 >
                   Add
                 </Button>
@@ -190,7 +195,8 @@ export default function Settings() {
                   <Radio
                     key={color}
                     value={color}
-                    icon={<CircleIcon sx={{ color }} />}
+                    disabled={usedColors.has(color)}
+                    icon={<CircleIcon sx={{ color, opacity: usedColors.has(color) ? 0.25 : 1 }} />}
                     checkedIcon={
                       <CircleIcon
                         sx={{
@@ -289,11 +295,14 @@ export default function Settings() {
                           value={editColor}
                           onChange={(e) => setEditColor(e.target.value)}
                         >
-                          {categoryColors.map((color) => (
+                          {categoryColors.map((color) => {
+                          const takenByOther = usedColors.has(color) && color !== category.color;
+                          return (
                             <Radio
                               key={color}
                               value={color}
-                              icon={<CircleIcon sx={{ color, fontSize: 18 }} />}
+                              disabled={takenByOther}
+                              icon={<CircleIcon sx={{ color, fontSize: 18, opacity: takenByOther ? 0.25 : 1 }} />}
                               checkedIcon={
                                 <CircleIcon
                                   sx={{
@@ -308,7 +317,8 @@ export default function Settings() {
                               }
                               sx={{ p: 0.25 }}
                             />
-                          ))}
+                          );
+                        })}
                         </RadioGroup>
                       </Box>
                     ) : (
