@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { useForm, Controller } from "react-hook-form";
 import { useTheme } from "@mui/system";
@@ -14,6 +14,8 @@ import { orange } from "@mui/material/colors";
 import ColorPicker from "./ColorPicker";
 import { CalendarEvent } from "@/@types/Events";
 import { v4 as uuidv4 } from "uuid";
+import { useAppSelector } from "../hooks/useAppSlector";
+import { selectCategories } from "../services/categoriesSlice";
 
 export type EditorHandle = {
   focusField: (field: string) => void;
@@ -28,6 +30,7 @@ export type FormValues = {
   eventStartTime: Dayjs;
   eventEndTime: Dayjs;
   eventSwatch: string;
+  eventCategoryId: string;
   eventStartDate?: Dayjs;
   eventEndDate?: Dayjs;
 };
@@ -45,6 +48,7 @@ const EventEditor = forwardRef(
     const theme = useTheme();
     const [allDay, setAllDay] = useState(false);
     const [event, setEvent] = useState<CalendarEvent | null>(null);
+    const { categories } = useAppSelector(selectCategories);
 
     const formContext = useForm<FormValues>({
       defaultValues: {
@@ -55,10 +59,16 @@ const EventEditor = forwardRef(
         eventEndTime: today.endOf("hour").add(30, "minute"),
         eventDescription: "",
         eventSwatch: orange[700],
+        eventCategoryId: "",
       },
     });
 
     const [color, setColor] = useState<string>(orange[700]);
+
+    useEffect(() => {
+      const matchingCategory = categories.find((c) => c.color === color);
+      formContext.setValue("eventCategoryId", matchingCategory?.id || "");
+    }, [color, categories, formContext]);
 
     useImperativeHandle(ref, () => ({
       focusField: (field: "eventTitle" | "eventDescription") => {
@@ -79,6 +89,7 @@ const EventEditor = forwardRef(
           "eventSwatch",
           event?.backgroundColor || orange[700]
         );
+        formContext.setValue("eventCategoryId", event?.categoryId || "");
         if (event?.allDay) {
           formContext.setValue("eventStartDate", dayjs(event.start));
           formContext.setValue("eventEndDate", dayjs(event.end));
@@ -122,6 +133,7 @@ const EventEditor = forwardRef(
           description: values.eventDescription,
         },
         backgroundColor: color,
+        ...(values.eventCategoryId ? { categoryId: values.eventCategoryId } : {}),
       });
       closeEditor();
     };

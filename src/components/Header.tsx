@@ -1,8 +1,11 @@
+import SettingsIcon from "@mui/icons-material/Settings";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import { grey } from "@mui/material/colors";
 import { useColorScheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
@@ -30,7 +33,7 @@ const Header = () => {
   };
 
   const isProtectedRoute = () => {
-    return ["/dashboard", "/todos"].includes(location.pathname);
+    return ["/dashboard", "/todos", "/settings"].includes(location.pathname);
   };
 
   if (!mode) {
@@ -106,6 +109,17 @@ const Header = () => {
               >
                 Todos
               </Button>
+              <Tooltip title="Settings">
+                <IconButton
+                  onClick={() => navigate("/settings")}
+                  size="small"
+                  sx={{
+                    color: location.pathname === "/settings" ? "#ff9800" : "inherit",
+                  }}
+                >
+                  <SettingsIcon />
+                </IconButton>
+              </Tooltip>
             </>
           )}
           <Checkbox

@@ -20,12 +20,13 @@ import authReducer from "../services/authSlice";
 import preferencesReducer from "../services/preferencesSlice";
 import pomodoroReducer from "../services/pomodoroSlice";
 import todoReducer from "../services/todoSlice";
+import categoriesReducer from "../services/categoriesSlice";
 
 const persistConfig = {
   key: "root",
   version: 1.5,
   storage,
-  whitelist: ["auth", "calendar", "preferences", "pomodoro", "todos"],
+  whitelist: ["auth", "calendar", "preferences", "pomodoro", "todos", "categories"],
 };
 
 const rootReducer = combineReducers({
@@ -34,6 +35,7 @@ const rootReducer = combineReducers({
   preferences: preferencesReducer,
   pomodoro: pomodoroReducer,
   todos: todoReducer,
+  categories: categoriesReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

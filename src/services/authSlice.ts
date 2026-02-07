@@ -55,8 +55,9 @@ export const logoutUser = createAsyncThunk(
 
     await signOut(auth);
 
-    // Always reset auth state
+    // Always reset auth state and user-level data
     dispatch(resetState());
+    dispatch({ type: "categories/resetCategoryState" });
 
     // For admin users, clear all persisted Redux state to prevent data leakage
     // when switching between admin and non-admin accounts on the same device

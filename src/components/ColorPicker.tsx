@@ -3,7 +3,7 @@ import CheckBoxRoundedIcon from "@mui/icons-material/CheckBoxRounded";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircleIcon from "@mui/icons-material/Circle";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-import { Box, ButtonBase, Popover, Radio, RadioGroup } from "@mui/material";
+import { Box, ButtonBase, Popover, Radio, RadioGroup, Tooltip } from "@mui/material";
 import {
   blue,
   blueGrey,
@@ -33,6 +33,7 @@ import {
   selectPreferences,
   updatePreferences,
 } from "../services/preferencesSlice";
+import { selectCategories } from "../services/categoriesSlice";
 import type { FormValues } from "./EventEditor";
 
 type ColorPickerProps = {
@@ -73,6 +74,15 @@ const ColorPicker = ({
   control,
 }: ColorPickerProps) => {
   const { eventSwatches } = useAppSelector(selectPreferences);
+  const { categories } = useAppSelector(selectCategories);
+
+  const colorToCategoryName = categories.reduce<Record<string, string>>(
+    (acc, cat) => {
+      acc[cat.color] = cat.name;
+      return acc;
+    },
+    {}
+  );
   const dispatch = useAppDispatch();
   const { user } = useContext(Context);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -134,12 +144,17 @@ const ColorPicker = ({
               }}
             >
               {swatches.map((color, index) => (
-                <Radio
+                <Tooltip
                   key={index}
-                  value={color}
-                  icon={<CircleIcon sx={{ color: color }} />}
-                  checkedIcon={<CheckCircleIcon sx={{ color: color }} />}
-                />
+                  title={colorToCategoryName[color] || "Other"}
+                  arrow
+                >
+                  <Radio
+                    value={color}
+                    icon={<CircleIcon sx={{ color: color }} />}
+                    checkedIcon={<CheckCircleIcon sx={{ color: color }} />}
+                  />
+                </Tooltip>
               ))}
               <ButtonBase onClick={handleClick}>
                 <AddCircleOutlineIcon sx={{ fontSize: 28, margin: 1 }} />

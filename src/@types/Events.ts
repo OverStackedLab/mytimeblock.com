@@ -7,9 +7,22 @@ export type CalendarEvent = {
   end?: Date | string;
   backgroundColor?: string;
   allDay?: boolean;
+  categoryId?: string;
   extendedProps?: {
     description?: string;
   };
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  color: string;
+};
+
+export type CategoryState = {
+  categories: Category[];
+  loading: boolean;
+  error: string | null;
 };
 
 export type CalendarState = {

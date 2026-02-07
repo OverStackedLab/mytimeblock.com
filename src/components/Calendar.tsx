@@ -28,6 +28,7 @@ import {
   fetchEvents,
   updateEventInFirebase,
 } from "../services/calendarSlice";
+import { fetchCategories } from "../services/categoriesSlice";
 import EventEditor, { EditorHandle } from "./EventEditor";
 import Pomodoro from "./Pomodoro";
 import SideBar from "./SideBar";
@@ -63,6 +64,9 @@ const Calendar = () => {
   useEffect(() => {
     if (isAdmin) {
       dispatch(fetchEvents(user?.uid || ""));
+    }
+    if (user?.uid) {
+      dispatch(fetchCategories(user.uid));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
