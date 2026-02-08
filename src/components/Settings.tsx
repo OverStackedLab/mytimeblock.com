@@ -48,10 +48,7 @@ import {
   selectCategories,
   updateCategory,
 } from "../services/categoriesSlice";
-import {
-  calendar,
-  updateEventInFirebase,
-} from "../services/calendarSlice";
+import { calendar, updateEventInFirebase } from "../services/calendarSlice";
 import Header from "./Header";
 
 const categoryColors = [
@@ -78,7 +75,6 @@ export default function Settings() {
   const [newColor, setNewColor] = useState<string>(orange[700]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
-  const [editColor, setEditColor] = useState("");
 
   const usedColors = new Set(categories.map((c) => c.color));
 
@@ -115,7 +111,7 @@ export default function Settings() {
         updateEventInFirebase({
           event: eventWithoutCategory,
           userId: user.uid,
-        })
+        }),
       );
     }
 
@@ -125,13 +121,11 @@ export default function Settings() {
   const handleStartEdit = (category: Category) => {
     setEditingId(category.id);
     setEditName(category.name);
-    setEditColor(category.color);
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditName("");
-    setEditColor("");
   };
 
   const handleSaveEdit = async (category: Category) => {
@@ -140,13 +134,11 @@ export default function Settings() {
     const updated: Category = {
       ...category,
       name: editName.trim(),
-      color: editColor,
     };
 
     await dispatch(updateCategory({ category: updated, userId: user.uid }));
     setEditingId(null);
     setEditName("");
-    setEditColor("");
   };
 
   return (
@@ -163,12 +155,17 @@ export default function Settings() {
             </Typography>
           </Box>
 
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}
+          >
             <Typography variant="h6" gutterBottom>
               Categories
             </Typography>
             <form onSubmit={handleAddCategory}>
-              <Box sx={{ display: "flex", gap: 1, mb: 1, alignItems: "center" }}>
+              <Box
+                sx={{ display: "flex", gap: 1, mb: 4, alignItems: "center" }}
+              >
                 <TextField
                   fullWidth
                   variant="outlined"
@@ -180,7 +177,13 @@ export default function Settings() {
                   type="submit"
                   variant="contained"
                   startIcon={<AddIcon />}
-                  sx={{ minWidth: 200, color: "white", height: 56, fontSize: 16 }}
+                  sx={{
+                    minWidth: 160,
+                    color: "white",
+                    height: 56,
+                    fontSize: 16,
+                  }}
+                  disableElevation
                 >
                   Add
                 </Button>
@@ -189,14 +192,21 @@ export default function Settings() {
                 row
                 value={newColor}
                 onChange={(e) => setNewColor(e.target.value)}
-                sx={{ mb: 2 }}
+                sx={{ mb: 2, ml: -0.5 }}
               >
                 {categoryColors.map((color) => (
                   <Radio
                     key={color}
                     value={color}
                     disabled={usedColors.has(color)}
-                    icon={<CircleIcon sx={{ color, opacity: usedColors.has(color) ? 0.25 : 1 }} />}
+                    icon={
+                      <CircleIcon
+                        sx={{
+                          color,
+                          opacity: usedColors.has(color) ? 0.25 : 1,
+                        }}
+                      />
+                    }
                     checkedIcon={
                       <CircleIcon
                         sx={{
@@ -225,7 +235,7 @@ export default function Settings() {
                 </Typography>
               </Box>
             ) : (
-              <List>
+              <List sx={{ ml: 0 }}>
                 {categories.map((category) => (
                   <ListItem
                     key={category.id}
@@ -271,10 +281,10 @@ export default function Settings() {
                       )
                     }
                     disablePadding
-                    sx={{ px: 2, py: 1 }}
+                    sx={{ py: 1 }}
                   >
                     {editingId === category.id ? (
-                      <Box sx={{ flex: 1, mr: 8 }}>
+                      <Box sx={{ flex: 1, px: 2, py: 1 }}>
                         <TextField
                           fullWidth
                           size="small"
@@ -288,38 +298,7 @@ export default function Settings() {
                             }
                           }}
                           autoFocus
-                          sx={{ mb: 1 }}
                         />
-                        <RadioGroup
-                          row
-                          value={editColor}
-                          onChange={(e) => setEditColor(e.target.value)}
-                        >
-                          {categoryColors.map((color) => {
-                          const takenByOther = usedColors.has(color) && color !== category.color;
-                          return (
-                            <Radio
-                              key={color}
-                              value={color}
-                              disabled={takenByOther}
-                              icon={<CircleIcon sx={{ color, fontSize: 18, opacity: takenByOther ? 0.25 : 1 }} />}
-                              checkedIcon={
-                                <CircleIcon
-                                  sx={{
-                                    color,
-                                    fontSize: 18,
-                                    outline: "2px solid",
-                                    outlineColor: color,
-                                    outlineOffset: 2,
-                                    borderRadius: "50%",
-                                  }}
-                                />
-                              }
-                              sx={{ p: 0.25 }}
-                            />
-                          );
-                        })}
-                        </RadioGroup>
                       </Box>
                     ) : (
                       <>

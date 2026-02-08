@@ -6,6 +6,11 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
@@ -20,6 +25,7 @@ import { selectCategories } from "../services/categoriesSlice";
 export type EditorHandle = {
   focusField: (field: string) => void;
   setEventFormValues: (event: CalendarEvent) => void;
+  requestClose: () => void;
 };
 
 export type FormValues = {
@@ -64,11 +70,30 @@ const EventEditor = forwardRef(
     });
 
     const [color, setColor] = useState<string>(orange[700]);
+    const [initialColor, setInitialColor] = useState<string>(orange[700]);
+    const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
     useEffect(() => {
       const matchingCategory = categories.find((c) => c.color === color);
-      formContext.setValue("eventCategoryId", matchingCategory?.id || "");
+      formContext.setValue("eventCategoryId", matchingCategory?.id || "", {
+        shouldDirty: false,
+      });
     }, [color, categories, formContext]);
+
+    const handleCloseRequest = () => {
+      const isDirty =
+        formContext.formState.isDirty || color !== initialColor;
+      if (isDirty) {
+        setShowDiscardDialog(true);
+      } else {
+        closeEditor();
+      }
+    };
+
+    const handleDiscard = () => {
+      setShowDiscardDialog(false);
+      closeEditor();
+    };
 
     useImperativeHandle(ref, () => ({
       focusField: (field: "eventTitle" | "eventDescription") => {
@@ -76,26 +101,29 @@ const EventEditor = forwardRef(
       },
       setEventFormValues: (event: CalendarEvent) => {
         setEvent(event);
-        formContext.setValue("eventTitle", (event?.title as string) || "");
-        formContext.setValue("eventDate", dayjs(event.start));
-        formContext.setValue("eventStartTime", dayjs(event.start));
-        formContext.setValue("eventEndTime", dayjs(event.end));
-        formContext.setValue("eventId", event?.id || uuidv4());
-        formContext.setValue(
-          "eventDescription",
-          event?.extendedProps?.description || ""
-        );
-        formContext.setValue(
-          "eventSwatch",
-          event?.backgroundColor || orange[700]
-        );
-        formContext.setValue("eventCategoryId", event?.categoryId || "");
-        if (event?.allDay) {
-          formContext.setValue("eventStartDate", dayjs(event.start));
-          formContext.setValue("eventEndDate", dayjs(event.end));
-        }
-        setColor(event?.backgroundColor || orange[700]);
+        const eventColor = event?.backgroundColor || orange[700];
+        formContext.reset({
+          eventId: event?.id || uuidv4(),
+          eventTitle: (event?.title as string) || "",
+          eventDate: dayjs(event.start),
+          eventStartTime: dayjs(event.start),
+          eventEndTime: dayjs(event.end),
+          eventDescription: event?.extendedProps?.description || "",
+          eventSwatch: eventColor,
+          eventCategoryId: event?.categoryId || "",
+          ...(event?.allDay
+            ? {
+                eventStartDate: dayjs(event.start),
+                eventEndDate: dayjs(event.end),
+              }
+            : {}),
+        });
+        setColor(eventColor);
+        setInitialColor(eventColor);
         setAllDay(event?.allDay || false);
+      },
+      requestClose: () => {
+        handleCloseRequest();
       },
     }));
 
@@ -157,7 +185,7 @@ const EventEditor = forwardRef(
           py={2}
         >
           <Typography variant="h6">Edit Block</Typography>
-          <Button variant="text" onClick={closeEditor}>
+          <Button variant="text" onClick={handleCloseRequest}>
             Close
           </Button>
         </Stack>
@@ -327,6 +355,23 @@ const EventEditor = forwardRef(
             </Stack>
           </Box>
         </form>
+        <Dialog open={showDiscardDialog} onClose={() => setShowDiscardDialog(false)}>
+          <DialogTitle>Unsaved changes</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              You have unsaved changes that will be lost. Do you want to discard
+              them?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDiscardDialog(false)}>
+              Keep Editing
+            </Button>
+            <Button onClick={handleDiscard} color="error">
+              Discard
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     );
   }

@@ -117,7 +117,10 @@ export default function TodoList() {
             </Typography>
           </Box>
 
-          <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{ p: 3, mb: 3, border: 1, borderColor: "divider" }}
+          >
             <form onSubmit={handleAddTodo}>
               <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
                 <TextField
@@ -131,7 +134,9 @@ export default function TodoList() {
                   type="submit"
                   variant="contained"
                   startIcon={<AddIcon />}
-                  sx={{ minWidth: 200, color: "white" }}
+                  size="large"
+                  sx={{ minWidth: 160, color: "white" }}
+                  disableElevation
                 >
                   Add
                 </Button>

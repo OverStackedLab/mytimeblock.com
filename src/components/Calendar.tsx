@@ -342,7 +342,7 @@ const Calendar = () => {
           <Pomodoro />
         </Box>
       </Box>
-      <SideBar open={isSidebarOpen} onClose={() => setIsSidebarOpen(false)}>
+      <SideBar open={isSidebarOpen} onClose={() => childRef.current?.requestClose()}>
         <EventEditor
           ref={childRef}
           closeEditor={() => setIsSidebarOpen(false)}
