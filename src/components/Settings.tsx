@@ -72,11 +72,15 @@ export default function Settings() {
   const { categories, loading } = useAppSelector(selectCategories);
   const { events } = useAppSelector(calendar);
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState<string>(orange[700]);
+  const [newColor, setNewColor] = useState<string>("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
 
   const usedColors = new Set(categories.map((c) => c.color));
+  const getFirstAvailableColor = (excluded?: string) => {
+    const used = excluded ? new Set([...usedColors, excluded]) : usedColors;
+    return categoryColors.find((c) => !used.has(c)) ?? "";
+  };
 
   useEffect(() => {
     if (user?.uid) {
@@ -84,9 +88,16 @@ export default function Settings() {
     }
   }, [user?.uid, dispatch]);
 
+  useEffect(() => {
+    if (!newColor || usedColors.has(newColor)) {
+      setNewColor(getFirstAvailableColor());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories]);
+
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim() || !user?.uid) return;
+    if (!newName.trim() || !user?.uid || usedColors.has(newColor)) return;
 
     const category: Category = {
       id: uuidv4(),
@@ -96,7 +107,7 @@ export default function Settings() {
 
     await dispatch(addCategory({ category, userId: user.uid }));
     setNewName("");
-    setNewColor(orange[700]);
+    setNewColor(getFirstAvailableColor(newColor));
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -151,7 +162,7 @@ export default function Settings() {
               Settings
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Manage your event categories
+              Manage your block categories
             </Typography>
           </Box>
 
@@ -176,6 +187,7 @@ export default function Settings() {
                 <Button
                   type="submit"
                   variant="contained"
+                  disabled={!newColor || usedColors.has(newColor)}
                   startIcon={<AddIcon />}
                   sx={{
                     minWidth: 160,
