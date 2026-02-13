@@ -3,7 +3,14 @@ import CheckBoxRoundedIcon from "@mui/icons-material/CheckBoxRounded";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircleIcon from "@mui/icons-material/Circle";
 import SquareRoundedIcon from "@mui/icons-material/SquareRounded";
-import { Box, ButtonBase, Popover, Radio, RadioGroup, Tooltip } from "@mui/material";
+import {
+  Box,
+  ButtonBase,
+  Popover,
+  Radio,
+  RadioGroup,
+  Tooltip,
+} from "@mui/material";
 import {
   blue,
   blueGrey,
@@ -81,7 +88,7 @@ const ColorPicker = ({
       acc[cat.color] = cat.name;
       return acc;
     },
-    {}
+    {},
   );
   const dispatch = useAppDispatch();
   const { user } = useContext(Context);
@@ -116,7 +123,7 @@ const ColorPicker = ({
           updatePreferences({
             preferences: { eventSwatches: [...prev, color] },
             userId: user?.uid,
-          })
+          }),
         );
       }
       return [...prev, color];
@@ -180,25 +187,33 @@ const ColorPicker = ({
                   value={value}
                   onChange={(e) => handleAddColor(e.target.value)}
                 >
-                  {optionalColors.map((color, index) => (
-                    <Radio
-                      key={index}
-                      value={color}
-                      sx={{
-                        padding: 0.25,
-                      }}
-                      icon={
-                        <SquareRoundedIcon
-                          sx={{ color: color, fontSize: 32 }}
-                        />
-                      }
-                      checkedIcon={
-                        <CheckBoxRoundedIcon
-                          sx={{ color: color, fontSize: 32 }}
-                        />
-                      }
-                    />
-                  ))}
+                  {optionalColors.map((color, index) => {
+                    const alreadyAdded = swatches.includes(color);
+                    return (
+                      <Radio
+                        key={index}
+                        value={color}
+                        disabled={alreadyAdded}
+                        sx={{
+                          p: 0.5,
+                        }}
+                        icon={
+                          <SquareRoundedIcon
+                            sx={{
+                              color,
+                              opacity: alreadyAdded ? 0.25 : 1,
+                              fontSize: 32,
+                            }}
+                          />
+                        }
+                        checkedIcon={
+                          <CheckBoxRoundedIcon
+                            sx={{ color: color, fontSize: 32 }}
+                          />
+                        }
+                      />
+                    );
+                  })}
                 </RadioGroup>
               </Box>
             </Popover>
